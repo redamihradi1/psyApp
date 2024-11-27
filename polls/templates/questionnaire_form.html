@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ formulaire.title }}{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="fixed top-4 right-4 z-50" id="alerts">
+    {% for message in messages %}
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md flex justify-between items-center" role="alert">
+        <span>{{ message }}</span>
+        <button onclick="this.parentElement.remove()" class="ml-4">&times;</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" action="?page={{ page_obj.number }}" class="bg-white shadow rounded-lg p-6 space-y-6">
+    {% csrf_token %}
+    <select name="student" required class="w-full p-2 border rounded-md border-gray-300">
+        {% for student in students %}
+            <option value="{{ student.id }}" {% if initial_data.student == student.id|stringformat:"s" %}selected{% endif %}>
+                {{ student.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    {% for question in page_obj %}
+        <div class="flex items-center justify-between border-b pb-4">
+            {% if question.can_ask %}
+                <span class="text-sm text-gray-700 w-2/3">{{ question.text }}
+                    <span class="text-xs text-gray-500">({{ question.sous_domain.domain }} - {{ question.sous_domain }})</span>
+                </span>
+                <div class="flex gap-4" id="group_{{ question.num_question }}">
+                    {% for value in '012'|make_list %}
+                    <label class="flex items-center">
+                        <input type="radio" 
+                                name="question_{{ question.num_question }}"
+                                value="{{ value }}"
+                                class="hidden radio-input"
+                                {% if initial_data.question_|add:question.num_question == value %}checked{% endif %}
+                                >
+                        <span class="px-4 py-2 border rounded cursor-pointer hover:bg-gray-50 radio-label">{{ value }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <span class="text-sm font-bold text-gray-700 w-full">{{ question.text }}</span>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="flex justify-between items-center">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Previous</a>
+        {% endif %}
+        
+        <span class="text-sm text-gray-600">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        <button type="submit" class="px-4 py-2 {% if page_obj.has_next %}bg-blue-600 hover:bg-blue-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white rounded-md">
+            {% if page_obj.has_next %}Next{% else %}Submit{% endif %}
+        </button>
+    </div>
+</form>
+
+<script>
+  document.querySelectorAll('.flex[id^="group_"]').forEach(group => {
+      const inputs = group.querySelectorAll('input[type="radio"]');
+      inputs.forEach(input => {
+          input.addEventListener('change', function() {
+              // Reset all labels in this group
+              group.querySelectorAll('.radio-label').forEach(label => {
+                  label.classList.remove('bg-green-500', 'text-white');
+                  label.classList.add('bg-white', 'text-gray-700');
+              });
+              
+              // Style selected label
+              if (this.checked) {
+                  this.nextElementSibling.classList.remove('bg-white', 'text-gray-700');
+                  this.nextElementSibling.classList.add('bg-green-500', 'text-white');
+              }
+          });
+      });
+  });
+  </script>
+{% endblock %}
