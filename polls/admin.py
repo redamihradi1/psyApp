@@ -3,37 +3,44 @@ from .models import Parent, Student, Formulaire, Domain, SousDomain, Question, Q
 
 @admin.register(Parent)
 class ParentAdmin(admin.ModelAdmin):
-    list_display = ( 'name','user_name')  # Updated to display user_name instead of user
+    list_display = ('username', 'name', 'email')  
     list_filter = ('name',)
-    search_fields = ('name', 'user_name')  # Search by both name and user_name
+    search_fields = ('username', 'name', 'email')
     ordering = ('name',)
     
     fieldsets = (
-        (None, {'fields': ('user_name', 'name')}),  # Updated field name
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('name', 'email')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
     )
-    
+
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('user_name', 'name')}  # Updated field name
+            'fields': ('username', 'name', 'password1', 'password2')}
         ),
     )
 
+# @admin.register(Student)
+# class StudentAdmin(admin.ModelAdmin):
+#     list_display = ('parent', 'name', 'age', 'sexe', 'date_of_birth')
+#     list_filter = ('name', 'age', 'sexe', 'date_of_birth')
+#     search_fields = ('name',)
+#     ordering = ('name', 'age', 'sexe', 'date_of_birth')
+#     fieldsets = (
+#         (None, {'fields': ('parent', 'name', 'age', 'sexe', 'date_of_birth')}),
+#     )
+#     add_fieldsets = (
+#         (None, {
+#             'classes': ('wide',),
+#             'fields': ('parent', 'name', 'age', 'sexe', 'date_of_birth')}
+#         ),
+#     )
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('parent', 'name', 'age', 'sexe', 'date_of_birth')
-    list_filter = ('name', 'age', 'sexe', 'date_of_birth')
-    search_fields = ('name',)
-    ordering = ('name', 'age', 'sexe', 'date_of_birth')
-    fieldsets = (
-        (None, {'fields': ('parent', 'name', 'age', 'sexe', 'date_of_birth')}),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('parent', 'name', 'age', 'sexe', 'date_of_birth')}
-        ),
-    )
+    list_display = ('name', 'parent', 'age', 'sexe')
+    list_filter = ('parent', 'sexe')
+    search_fields = ('name', 'parent__username')
 
 @admin.register(Formulaire)
 class FormulaireAdmin(admin.ModelAdmin):
@@ -88,7 +95,7 @@ class QuestionAdmin(admin.ModelAdmin):
     list_display = ('num_question','sous_domain', 'text','can_ask', )
     list_filter = ('sous_domain','can_ask',)
     search_fields = ('text',)
-    ordering = ('sous_domain', 'text')
+    ordering = ('num_question', 'text')
     fieldsets = (
         (None, {'fields': ('sous_domain', 'text','can_ask', )}),
     )
