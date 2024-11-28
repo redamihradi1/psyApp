@@ -1,0 +1,83 @@
+{% extends '../base.html' %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">
+    Résultats des Scores - {{ questionnaire.student.name }}
+  </h1>
+
+  <!-- Domaine Performance -->
+  {% regroup scores by domain as domain_list %} {% for domain in domain_list %}
+  <div class="bg-white shadow rounded-lg mb-8">
+    <div class="bg-gray-50 px-6 py-4 border-b">
+      <h2 class="text-xl font-semibold">{{ domain.grouper }}</h2>
+    </div>
+
+    <div class="p-6">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            >
+              Sous Domaine
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            >
+              Score Brut
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            >
+              NS
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            >
+              Percentile
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            >
+              Niveau
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+            >
+              Age Développé
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for score in domain.list %}
+          <tr>
+            <td class="px-6 py-4">{{ score.sous_domain }}</td>
+            <td class="px-6 py-4">{{ score.score_brut }}</td>
+            <td class="px-6 py-4">{{ score.ns }}</td>
+            <td class="px-6 py-4">{{ score.percentile }}</td>
+            <td class="px-6 py-4">{{ score.niveau }}</td>
+            <td class="px-6 py-4">{{ score.age_developpe }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="mt-6 flex justify-between">
+    <a
+      href="{% url 'home' %}"
+      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+    >
+      Retour à l'accueil
+    </a>
+    <a
+      href="#"
+      onclick="window.print()"
+      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+    >
+      Imprimer les résultats
+    </a>
+  </div>
+</div>
+{% endblock %}

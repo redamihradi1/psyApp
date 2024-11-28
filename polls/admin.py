@@ -1,41 +1,47 @@
 from django.contrib import admin
-from .models import Parent, Student, Formulaire, Domain, SousDomain, Question, Questionnaire , Response , DomaineResponse , SousDomaineResponse
+from django.contrib.auth.admin import UserAdmin
+from .models import Parent, Student, Formulaire, Domain, SousDomain, Question, Questionnaire , Response , DomaineResponse , SousDomaineResponse ,AgeTranche, ScoreParametrage, StudentScore
 
+# @admin.register(Parent)
+# class ParentAdmin(admin.ModelAdmin):
+#     list_display = ('username', 'name', 'email')  
+#     list_filter = ('name',)
+#     search_fields = ('username', 'name', 'email')
+#     ordering = ('name',)
+    
+#     fieldsets = (
+#         (None, {'fields': ('username', 'password')}),
+#         ('Personal info', {'fields': ('name', 'email')}),
+#         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+#     )
+
+#     add_fieldsets = (
+#         (None, {
+#             'classes': ('wide',),
+#             'fields': ('username', 'name', 'password1', 'password2')}
+#         ),
+#     )
 @admin.register(Parent)
 class ParentAdmin(admin.ModelAdmin):
-    list_display = ('username', 'name', 'email')  
-    list_filter = ('name',)
+    list_display = ('username', 'name', 'email', 'is_parent', 'is_superuser')
+    list_filter = ('name', 'is_parent', 'is_staff', 'is_superuser')
     search_fields = ('username', 'name', 'email')
     ordering = ('name',)
     
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Permissions', {'fields': ('is_parent', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'name', 'password1', 'password2')}
+            'fields': ('username', 'name', 'email', 'password1', 'password2', 'is_parent')}
         ),
     )
 
-# @admin.register(Student)
-# class StudentAdmin(admin.ModelAdmin):
-#     list_display = ('parent', 'name', 'age', 'sexe', 'date_of_birth')
-#     list_filter = ('name', 'age', 'sexe', 'date_of_birth')
-#     search_fields = ('name',)
-#     ordering = ('name', 'age', 'sexe', 'date_of_birth')
-#     fieldsets = (
-#         (None, {'fields': ('parent', 'name', 'age', 'sexe', 'date_of_birth')}),
-#     )
-#     add_fieldsets = (
-#         (None, {
-#             'classes': ('wide',),
-#             'fields': ('parent', 'name', 'age', 'sexe', 'date_of_birth')}
-#         ),
-#     )
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'parent', 'age', 'sexe')
@@ -174,3 +180,20 @@ class SousDomaineResponseAdmin(admin.ModelAdmin):
             'fields': ('sous_domaine', 'questionnaire', 'score_total')}
         ),
     )
+
+@admin.register(AgeTranche)
+class AgeTrancheAdmin(admin.ModelAdmin):
+    list_display = ('code', 'label', 'min_months', 'max_months')
+    search_fields = ('code', 'label')
+
+@admin.register(ScoreParametrage)
+class ScoreParametrageAdmin(admin.ModelAdmin):
+    list_display = ('tranche', 'domain', 'sous_domain', 'score_brut', 'ns', 'percentile')
+    list_filter = ('tranche', 'domain', 'sous_domain')
+    search_fields = ('domain', 'sous_domain')
+
+@admin.register(StudentScore)
+class StudentScoreAdmin(admin.ModelAdmin):
+    list_display = ('student', 'questionnaire', 'domain', 'sous_domain', 'score_brut', 'ns', 'percentile')
+    list_filter = ('domain', 'sous_domain', 'niveau')
+    search_fields = ('student__name', 'questionnaire__unique_key')

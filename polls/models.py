@@ -7,7 +7,10 @@ from django.contrib.auth.models import AbstractUser
 
 class Parent(AbstractUser):
     name = models.CharField(max_length=255, default='')
-    
+    is_parent = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=False)
+
+
     class Meta:
         swappable = 'AUTH_USER_MODEL'
 
@@ -16,7 +19,7 @@ class Student(models.Model):
     id = models.AutoField(primary_key=True)
     # parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='students')
     parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='students')
-    name = models.CharField(max_length=255, default='', verbose_name='Nom de l’Élève')
+    name = models.FloatField(max_length=255, default='', verbose_name='Nom de l’Élève')
     age = models.IntegerField(default=1, verbose_name='Âge')
     sexe = models.CharField(max_length=1, choices=[('M', 'Masculin'), ('F', 'Féminin')], default='M', verbose_name='Sexe')
     date_of_birth = models.DateField(null=True, blank=True, verbose_name='Date de Naissance')
@@ -99,3 +102,29 @@ class SousDomaineResponse(models.Model):
 
     def __str__(self):
         return f"{self.sous_domaine.name} - {self.questionnaire} - {self.score_total}"
+
+class AgeTranche(models.Model):
+    code = models.CharField(max_length=3)
+    label = models.CharField(max_length=100)
+    min_months = models.IntegerField()
+    max_months = models.IntegerField()
+
+class ScoreParametrage(models.Model):
+    tranche = models.ForeignKey(AgeTranche, on_delete=models.CASCADE)
+    domain = models.CharField(max_length=50)
+    sous_domain = models.CharField(max_length=50)
+    score_brut = models.IntegerField()
+    ns = models.IntegerField()
+    percentile = models.CharField(max_length=10)
+    age_developpe = models.CharField(max_length=10)
+
+class StudentScore(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    domain = models.CharField(max_length=50)
+    sous_domain = models.CharField(max_length=50)
+    score_brut = models.IntegerField()
+    ns = models.IntegerField(null=True)
+    percentile = models.CharField(max_length=10, null=True)
+    niveau = models.CharField(max_length=20, null=True)
+    age_developpe = models.CharField(max_length=10, null=True)

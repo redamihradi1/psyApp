@@ -4,16 +4,7 @@
 {% block title %}{{ formulaire.title }}{% endblock %}
 
 {% block content %}
-{% if messages %}
-<div class="fixed top-4 right-4 z-50" id="alerts">
-    {% for message in messages %}
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md flex justify-between items-center" role="alert">
-        <span>{{ message }}</span>
-        <button onclick="this.parentElement.remove()" class="ml-4">&times;</button>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
+
 
 <form method="post" action="?page={{ page_obj.number }}" class="bg-white shadow rounded-lg p-6 space-y-6">
     {% csrf_token %}

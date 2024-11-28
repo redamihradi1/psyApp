@@ -13,6 +13,13 @@
         <div class="flex justify-between h-16">
           <div class="flex items-center">
             <span class="text-xl font-bold text-gray-800">Questionnaire</span>
+            {% if request.user.is_superuser %}
+            <a
+              href="{% url 'admin_dashboard' %}"
+              class="ml-6 px-3 py-2 rounded-md text-sm font-medium text-gray-900"
+              >Admin Dashboard</a
+            >
+            {% endif %}
             <a
               href="/"
               class="ml-6 px-3 py-2 rounded-md text-sm font-medium text-gray-900"
@@ -49,7 +56,32 @@
     </nav>
 
     <main class="max-w-7xl mx-auto py-6 px-4">
-      {% block content %}{% endblock %}
+      {% if messages %}
+      <div class="fixed top-4 right-4 z-50" id="alerts">
+        {% for message in messages %} {% comment %} check if success messag or
+        erro {% endcomment %} {% if message.tags == 'success' %}
+        <div
+          class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-md flex justify-between items-center"
+          role="alert"
+        >
+          <span>{{ message }}</span>
+          <button onclick="this.parentElement.remove()" class="ml-4">
+            &times;
+          </button>
+        </div>
+        {% else %}
+        <div
+          class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md flex justify-between items-center"
+          role="alert"
+        >
+          <span>{{ message }}</span>
+          <button onclick="this.parentElement.remove()" class="ml-4">
+            &times;
+          </button>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+      {% endif %} {% block content %}{% endblock %}
     </main>
   </body>
 </html>
