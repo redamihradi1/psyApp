@@ -15,16 +15,13 @@ from .utils.score_calculator import ScoreCalculator
 
 @login_required
 def questionnaire_view(request, formulaire_id):
-    print("Start questionnaire view")
     formulaire = get_object_or_404(Formulaire, id=formulaire_id)
     parent = request.user
-    print("Parent => ", parent)
     #get all students if superuser else get students of parent
     if parent.is_superuser:
         students = Student.objects.all()
     else:
         students = Student.objects.filter(parent=parent)
-    print("Students", students)
     domains = Domain.objects.filter(formulaire=formulaire)
     sousdomains = SousDomain.objects.filter(domain__in=domains)
     questions = Question.objects.filter(sous_domain__in=sousdomains).order_by('num_question')
@@ -56,8 +53,6 @@ def questionnaire_view(request, formulaire_id):
 
         if int(page_number) == paginator.num_pages:
             # Process final submission
-            #check if all questions are answered
-            print("Check questionnaire x1")
             if not check_questionnaire(questions,request):
                 unanswered = [q.num_question for q in questions if q.can_ask and f'question_{q.num_question}' not in request.session]
                 messages.error(request, f"Questions non répondues: {', '.join(map(str, unanswered))}")
@@ -215,20 +210,38 @@ def detailed_summary_view(request, questionnaire_id):
         'summary_data': summary_data
     })
 
+# def calculate_scores(request, questionnaire_id):
+#     try :
+#         questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
+#         calculator = ScoreCalculator(questionnaire.student, questionnaire)
+#         scores = calculator.calculate()
+#     except Exception as e:
+#         messages.error(request, f"An error occurred while calculating scores: {e}")
+    
+#     context = {
+#         'questionnaire': questionnaire,
+#         'scores': scores if 'scores' in locals() else []
+#     }
+    
+#     return render(request, 'questionnaire/score_results.html', context)
+
 def calculate_scores(request, questionnaire_id):
-    try :
+    try:
         questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
         calculator = ScoreCalculator(questionnaire.student, questionnaire)
-        scores = calculator.calculate()
+        resultat_final, deuxieme_tableau = calculator.calculate()
+        
+        context = {
+            'questionnaire': questionnaire,
+            'resultat_final': resultat_final,
+            'deuxieme_tableau': deuxieme_tableau
+        }
+        
+        return render(request, 'questionnaire/score_results.html', context)
+        
     except Exception as e:
-        messages.error(request, f"An error occurred while calculating scores: {e}")
-    
-    context = {
-        'questionnaire': questionnaire,
-        'scores': scores if 'scores' in locals() else []
-    }
-    
-    return render(request, 'questionnaire/score_results.html', context)
+        messages.error(request, f"An error occurred while calculating scores: {str(e)}")
+        return redirect('home')
 
 def generate_pdf(request, questionnaire_id):
     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
@@ -244,12 +257,10 @@ def generate_pdf(request, questionnaire_id):
     return response
 
 def check_questionnaire(questions, request):
-    print("Check questionnaire")
     for question in questions:
         if question.can_ask:
             key = f'question_{question.num_question}'
             if key not in request.session:
-                print(f"Missing answer for question {question.num_question}")
                 return False
     return True
 
@@ -271,10 +282,7 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        print("username", username)
-        print("password", password)
         user = authenticate(request, username=username, password=password)
-        print("user", user)
         if user:
             login(request, user)
             messages.success(request, 'You are now logged in')
@@ -294,10 +302,6 @@ def home_view(request):
         questionnaires = Questionnaire.objects.all()
     else:
         questionnaires = Questionnaire.objects.filter(parent=request.user)
-    print("Current user", request.user)
-    print("Questionnaires size", len(questionnaires))
-    for questionnaire in questionnaires:
-        print("Questionnaire parent", questionnaire.parent)
     return render(request, 'home.html', {
         'formulaires': formulaires,
         'questionnaires': questionnaires

@@ -19,8 +19,8 @@ class Student(models.Model):
     id = models.AutoField(primary_key=True)
     # parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='students')
     parent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='students')
-    name = models.FloatField(max_length=255, default='', verbose_name='Nom de l’Élève')
-    age = models.IntegerField(default=1, verbose_name='Âge')
+    name = models.CharField(max_length=255, default='', verbose_name='Nom de l’Élève')
+    age = models.FloatField(default=1, verbose_name='Âge')
     sexe = models.CharField(max_length=1, choices=[('M', 'Masculin'), ('F', 'Féminin')], default='M', verbose_name='Sexe')
     date_of_birth = models.DateField(null=True, blank=True, verbose_name='Date de Naissance')
 

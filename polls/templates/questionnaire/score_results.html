@@ -1,83 +1,167 @@
 {% extends '../base.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
   <h1 class="text-2xl font-bold mb-6">
-    Résultats des Scores - {{ questionnaire.student.name }}
+    Résultats du Score - {{ questionnaire.student.name }}
   </h1>
 
-  <!-- Domaine Performance -->
-  {% regroup scores by domain as domain_list %} {% for domain in domain_list %}
-  <div class="bg-white shadow rounded-lg mb-8">
-    <div class="bg-gray-50 px-6 py-4 border-b">
-      <h2 class="text-xl font-semibold">{{ domain.grouper }}</h2>
+  <!-- Premier tableau - Résultat Final -->
+  <div class="bg-white shadow rounded-lg mb-8 overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b">
+      <h2 class="text-xl font-semibold">
+        Résultats Détaillés par Sous-Domaine
+      </h2>
     </div>
-
-    <div class="p-6">
+    <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead>
+        <thead class="bg-gray-50">
           <tr>
             <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Sous Domaine
+              Domaine
             </th>
             <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Score Brut
+              Sous-Domaine
             </th>
             <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Score Total
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               NS
             </th>
             <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Percentile
             </th>
             <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Niveau
             </th>
             <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Age Développé
+              Âge Développé
             </th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          {% for score in domain.list %}
-          <tr>
-            <td class="px-6 py-4">{{ score.sous_domain }}</td>
-            <td class="px-6 py-4">{{ score.score_brut }}</td>
-            <td class="px-6 py-4">{{ score.ns }}</td>
-            <td class="px-6 py-4">{{ score.percentile }}</td>
-            <td class="px-6 py-4">{{ score.niveau }}</td>
-            <td class="px-6 py-4">{{ score.age_developpe }}</td>
+          {% for resultat in resultat_final %}
+          <tr class="hover:bg-gray-50">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+            >
+              {{ resultat.domaine }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.label }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.total }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.ns }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.percentile }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.niveau }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.age_developpe }}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-  {% endfor %}
 
-  <div class="mt-6 flex justify-between">
+  <!-- Deuxième tableau - Synthèse par Domaine -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b">
+      <h2 class="text-xl font-semibold">Synthèse par Domaine</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Domaine
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Somme NS
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Percentile
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Niveau
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Âge Développé
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for tableau in deuxieme_tableau %}
+          <tr class="hover:bg-gray-50">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+            >
+              {{ tableau.domaine }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ tableau.somme_ns }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ tableau.percentile }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ tableau.niveau }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ tableau.age_developpe }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Boutons de navigation -->
+  <div class="mt-8 flex justify-between">
     <a
       href="{% url 'home' %}"
-      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
     >
       Retour à l'accueil
     </a>
-    <a
-      href="#"
+    <button
       onclick="window.print()"
-      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+      class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
     >
       Imprimer les résultats
-    </a>
+    </button>
   </div>
 </div>
 {% endblock %}

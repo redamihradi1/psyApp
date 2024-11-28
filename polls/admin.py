@@ -185,12 +185,32 @@ class SousDomaineResponseAdmin(admin.ModelAdmin):
 class AgeTrancheAdmin(admin.ModelAdmin):
     list_display = ('code', 'label', 'min_months', 'max_months')
     search_fields = ('code', 'label')
+    ordering = ('min_months', 'max_months')
+    fieldsets = (
+        (None, {'fields': ('code', 'label', 'min_months', 'max_months')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('code', 'label', 'min_months', 'max_months')}
+        ),
+    )
 
 @admin.register(ScoreParametrage)
 class ScoreParametrageAdmin(admin.ModelAdmin):
     list_display = ('tranche', 'domain', 'sous_domain', 'score_brut', 'ns', 'percentile')
     list_filter = ('tranche', 'domain', 'sous_domain')
     search_fields = ('domain', 'sous_domain')
+    ordering = ('tranche', 'domain', 'sous_domain', 'score_brut')
+    fieldsets = (
+        (None, {'fields': ('tranche', 'domain', 'sous_domain', 'score_brut', 'ns', 'percentile', 'age_developpe')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('tranche', 'domain', 'sous_domain', 'score_brut', 'ns', 'percentile', 'age_developpe')}
+        ),
+    )
 
 @admin.register(StudentScore)
 class StudentScoreAdmin(admin.ModelAdmin):
