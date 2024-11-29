@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Parent, Student, Formulaire, Domain, SousDomain, Question, Questionnaire , Response , DomaineResponse , SousDomaineResponse ,AgeTranche, ScoreParametrage, StudentScore
+from .models import Parent, Student, Formulaire, Domain, SousDomain, Question, Questionnaire , Response , AgeDeveloppeParametrage,DomaineResponse , SousDomaineResponse ,AgeTranche, ScoreParametrage, StudentScore ,NoteStandardPercentile
 
 # @admin.register(Parent)
 # class ParentAdmin(admin.ModelAdmin):
@@ -212,8 +212,36 @@ class ScoreParametrageAdmin(admin.ModelAdmin):
         ),
     )
 
-@admin.register(StudentScore)
-class StudentScoreAdmin(admin.ModelAdmin):
-    list_display = ('student', 'questionnaire', 'domain', 'sous_domain', 'score_brut', 'ns', 'percentile')
-    list_filter = ('domain', 'sous_domain', 'niveau')
-    search_fields = ('student__name', 'questionnaire__unique_key')
+@admin.register(AgeDeveloppeParametrage)
+class AgeDeveloppeParametrageAdmin(admin.ModelAdmin):
+    list_display = ('sous_domain', 'score_brut', 'age_developpe')
+    list_filter = ('sous_domain',)
+    search_fields = ('sous_domain', 'score_brut')
+    ordering = ('sous_domain', 'score_brut')
+    fieldsets = (
+        (None, {'fields': ('sous_domain', 'score_brut', 'age_developpe')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('sous_domain', 'score_brut', 'age_developpe')}
+        ),
+    )
+
+
+@admin.register(NoteStandardPercentile)
+class NoteStandardPercentileAdmin(admin.ModelAdmin):
+    list_display = ('domain', 'somme_score_standard', 'rang_percentile')
+    list_filter = ('domain',)
+    search_fields = ('domain', 'somme_score_standard', 'rang_percentile')
+    ordering = ('domain', 'somme_score_standard')
+    
+    # def has_delete_permission(self, request, obj=None):
+    #     # Empêcher la suppression accidentelle des données de référence
+    #     return False
+        
+    # def get_readonly_fields(self, request, obj=None):
+    #     # Rendre les champs en lecture seule après création
+    #     if obj:  # Si l'objet existe déjà
+    #         return ('domain', 'somme_score_standard')
+    #     return ()

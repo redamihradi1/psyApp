@@ -118,6 +118,34 @@ class ScoreParametrage(models.Model):
     percentile = models.CharField(max_length=10)
     age_developpe = models.CharField(max_length=10)
 
+class AgeDeveloppeParametrage(models.Model):
+    sous_domain = models.CharField(max_length=50)  # CVP, LE, etc.
+    score_brut = models.IntegerField()
+    age_developpe = models.CharField(max_length=10)  # "<12", "13", etc.
+    
+    def __str__(self):
+        return f"{self.sous_domain} - {self.score_brut} - {self.age_developpe}"
+
+    class Meta:
+        unique_together = ('sous_domain', 'score_brut')
+
+class NoteStandardPercentile(models.Model):
+    DOMAIN_CHOICES = [
+        ('Communication', 'Communication'),
+        ('Motricité', 'Motricité'),
+        ('Comportements', 'Comportements inadaptés')
+    ]
+
+    domain = models.CharField(max_length=50, choices=DOMAIN_CHOICES)
+    somme_score_standard = models.CharField(max_length=10)  # Pour pouvoir stocker "> 61"
+    rang_percentile = models.CharField(max_length=10)  # Pour pouvoir stocker "< 1" ou "> 99"
+
+    class Meta:
+        unique_together = ('domain', 'somme_score_standard')
+
+    def __str__(self):
+        return f"{self.domain} - NS: {self.somme_score_standard} - Percentile: {self.rang_percentile}"
+
 class StudentScore(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)

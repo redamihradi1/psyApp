@@ -1,5 +1,7 @@
 {% extends '../base.html' %} {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  <!-- Total Parents Card -->
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex items-center">
       <div class="p-3 rounded-full bg-blue-500 bg-opacity-20">
@@ -24,6 +26,7 @@
     </div>
   </div>
 
+  <!-- Total Students Card -->
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex items-center">
       <div class="p-3 rounded-full bg-green-500 bg-opacity-20">
@@ -48,6 +51,7 @@
     </div>
   </div>
 
+  <!-- Formulaires Stats -->
   {% for stat in formulaire_stats %}
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex items-center">
@@ -76,4 +80,409 @@
   </div>
   {% endfor %}
 </div>
+
+<!-- Recent Questionnaires Section -->
+  {% comment %} <div class="bg-white rounded-lg shadow mb-8">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800">Questionnaires Récents</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Parent
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Étudiant
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Formulaire
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Date
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for questionnaire in recent_questionnaires %}
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">
+                {{ questionnaire.parent.name }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                {{ questionnaire.student.name }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                {{ questionnaire.formulaire.title }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ questionnaire.created_at|date:"d/m/Y H:i" }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div> {% endcomment %}
+
+<!-- Section Parents -->
+<div class="bg-white rounded-lg shadow mb-8">
+  <div
+    class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
+  >
+    <h2 class="text-xl font-semibold text-gray-800">Parents</h2>
+
+    <a
+      href="{% url 'create_parent' %}"
+      class="inline-flex items-center bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 mr-2"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      Ajouter
+    </a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          >
+            Nom
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          >
+            Email
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          >
+            Date d'inscription
+          </th>
+          <th
+            class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for parent in parents %}
+        <tr>
+          <td
+            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+          >
+            {{ parent.name }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ parent.email }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ parent.date_joined|date:"d/m/Y" }}
+          </td>
+          <td
+            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+          >
+            <div class="flex justify-end space-x-3">
+              <!-- Bouton Modifier -->
+              <a
+                href="{% url 'edit_parent' parent.id %}"
+                class="text-indigo-600 hover:text-indigo-900 relative group"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+                  />
+                </svg>
+                <span
+                  class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2"
+                >
+                  
+                </span>
+              </a>
+              <!-- Bouton Supprimer -->
+              <button
+                onclick="deleteParent({{ parent.id }})"
+                class="text-red-600 hover:text-red-900 relative group"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span
+                  class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2"
+                >
+                  
+                </span>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Parents -->
+  <div class="px-6 py-4 border-t border-gray-200">
+    <div class="flex justify-between items-center">
+      <div>Page {{ parents.number }} sur {{ parents.paginator.num_pages }}</div>
+      <div class="flex space-x-2">
+        {% if parents.has_previous %}
+        <a
+          href="?parents_page={{ parents.previous_page_number }}"
+          class="px-3 py-1 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+          >&laquo; Précédent</a
+        >
+        {% endif %} {% if parents.has_next %}
+        <a
+          href="?parents_page={{ parents.next_page_number }}"
+          class="px-3 py-1 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+          >Suivant &raquo;</a
+        >
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section Étudiants -->
+<div class="bg-white rounded-lg shadow">
+  <div
+    class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
+  >
+    <h2 class="text-xl font-semibold text-gray-800">Étudiants</h2>
+
+    <a
+      href="{% url 'create_student' %}"
+      class="inline-flex items-center bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5 mr-2"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      Ajouter
+    </a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          >
+            Nom
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          >
+            Parent
+          </th>
+          <th
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+          >
+            Âge
+          </th>
+          <th
+            class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for student in students %}
+        <tr>
+          <td
+            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+          >
+            {{ student.name }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ student.parent.name }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ student.age }}
+          </td>
+          <td
+            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+          >
+            <div class="flex justify-end space-x-3">
+              <!-- Bouton Modifier -->
+              <a
+                href="{% url 'edit_student' student.id %}"
+                class="text-indigo-600 hover:text-indigo-900 relative group"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+                  />
+                </svg>
+                <span
+                  class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2"
+                >
+                  
+                </span>
+              </a>
+              <!-- Bouton Supprimer -->
+              <button
+                onclick="deleteStudent({{ student.id }})"
+                class="text-red-600 hover:text-red-900 relative group"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span
+                  class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2"
+                >
+                </span>
+              </button>
+
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Étudiants -->
+  <div class="px-6 py-4 border-t border-gray-200">
+    <div class="flex justify-between items-center">
+      <div>
+        Page {{ students.number }} sur {{ students.paginator.num_pages }}
+      </div>
+      <div class="flex space-x-2">
+        {% if students.has_previous %}
+        <a
+          href="?students_page={{ students.previous_page_number }}"
+          class="px-3 py-1 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+          >&laquo; Précédent</a
+        >
+        {% endif %} {% if students.has_next %}
+        <a
+          href="?students_page={{ students.next_page_number }}"
+          class="px-3 py-1 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+          >Suivant &raquo;</a
+        >
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript pour la suppression -->
+<script>
+  function deleteParent(parentId) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce parent ?")) {
+      fetch(`/delete-parent/${parentId}/`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+      }).then((response) => {
+        if (response.ok) {
+          window.location.reload();
+        }
+      });
+    }
+  }
+
+  function deleteStudent(studentId) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer cet étudiant ?")) {
+      fetch(`/delete-student/${studentId}/`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+      }).then((response) => {
+        if (response.ok) {
+          window.location.reload();
+        }
+      });
+    }
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
 {% endblock %}

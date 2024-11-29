@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import questionnaire_view,summary_view, success_view ,home_view, login_view , logout_view ,register_view ,admin_dashboard,detailed_summary_view,generate_pdf,calculate_scores
+from .views import *
 
 urlpatterns = [
     path('', home_view , name='home'), 
@@ -14,4 +14,9 @@ urlpatterns = [
     path('questionnaire/success/', success_view, name='success_view'),  # URL for the success page
 
     path('admincustom/dashboard/', admin_dashboard, name='admin_dashboard'),
+
+    path('admincustom/create-parent/', create_parent, name='create_parent'),
+    path('admincustom/edit-parent/<int:parent_id>/', edit_parent, name='edit_parent'),
+    path('admincustom/create-student/', create_student, name='create_student'),
+    path('admincustom/edit-student/<int:student_id>/', edit_student, name='edit_student'),
 ]

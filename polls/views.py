@@ -11,6 +11,7 @@ from django.db.models import Count
 from django.http import HttpResponse
 from .utils.pdf_generator import generate_questionnaire_pdf
 from .utils.score_calculator import ScoreCalculator
+from .forms import ParentForm, StudentForm
 
 
 @login_required
@@ -26,7 +27,7 @@ def questionnaire_view(request, formulaire_id):
     sousdomains = SousDomain.objects.filter(domain__in=domains)
     questions = Question.objects.filter(sous_domain__in=sousdomains).order_by('num_question')
     
-    paginator = Paginator(questions, 15)
+    paginator = Paginator(questions, 29)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
@@ -124,6 +125,20 @@ def questionnaire_view(request, formulaire_id):
         next_page = int(page_number) + 1
         return redirect(f'{request.path}?page={next_page}')
         
+    
+    # Prepopulate form with session data
+    initial_data = {}
+    for key in request.session.keys():
+        if key.startswith('question_') or key == 'student':
+            initial_data[key] = request.session[key]
+
+    return render(request, 'questionnaire_form.html', {
+        'formulaire': formulaire,
+        'students': students,
+        'page_obj': page_obj,
+        'initial_data': initial_data,
+        'visited_pages': request.session.get('visited_pages', [])
+    })
 
     return render(request, 'questionnaire_form.html', {
         'formulaire': formulaire,
@@ -210,20 +225,6 @@ def detailed_summary_view(request, questionnaire_id):
         'summary_data': summary_data
     })
 
-# def calculate_scores(request, questionnaire_id):
-#     try :
-#         questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-#         calculator = ScoreCalculator(questionnaire.student, questionnaire)
-#         scores = calculator.calculate()
-#     except Exception as e:
-#         messages.error(request, f"An error occurred while calculating scores: {e}")
-    
-#     context = {
-#         'questionnaire': questionnaire,
-#         'scores': scores if 'scores' in locals() else []
-#     }
-    
-#     return render(request, 'questionnaire/score_results.html', context)
 
 def calculate_scores(request, questionnaire_id):
     try:
@@ -307,11 +308,14 @@ def home_view(request):
         'questionnaires': questionnaires
     })
 
+
+
 @login_required
 def admin_dashboard(request):
     if not request.user.is_superuser:
         return redirect('home')
-        
+    
+    # Stats existantes    
     total_parents = Parent.objects.filter(is_parent=True).count()
     total_students = Student.objects.count()
     
@@ -319,14 +323,99 @@ def admin_dashboard(request):
         total_questionnaires=Count('questionnaire')
     )
     
-    recent_questionnaires = Questionnaire.objects.select_related(
-        'parent', 'student', 'formulaire'
-    ).order_by('-created_at')[:5]
+    # Pagination pour les parents
+    parents_list = Parent.objects.filter(is_parent=True).order_by('-date_joined')
+    parents_paginator = Paginator(parents_list, 4)
+    parents_page = request.GET.get('parents_page')
+    parents = parents_paginator.get_page(parents_page)
+    
+    # Pagination pour les étudiants
+    students_list = Student.objects.all().order_by('-id')
+    students_paginator = Paginator(students_list, 4)
+    students_page = request.GET.get('students_page')
+    students = students_paginator.get_page(students_page)
+    
+    # recent_questionnaires = Questionnaire.objects.select_related(
+    #     'parent', 'student', 'formulaire'
+    # ).order_by('-created_at')[:5]
     
     context = {
         'total_parents': total_parents,
         'total_students': total_students,
         'formulaire_stats': formulaire_stats,
-        'recent_questionnaires': recent_questionnaires
+        'parents': parents,
+        'students': students
     }
     return render(request, 'admin/base_admin_dashboard.html', context)
+
+@login_required
+def create_parent(request):
+    if not request.user.is_superuser:
+        return redirect('home')
+        
+    if request.method == 'POST':
+        form = ParentForm(request.POST)
+        if form.is_valid():
+            parent = form.save(commit=False)
+            parent.is_parent = True
+            parent.set_password(form.cleaned_data['password'])
+            parent.save()
+            messages.success(request, 'Parent créé avec succès')
+            return redirect('admin_dashboard')
+    else:
+        form = ParentForm()
+    
+    return render(request, 'admin/parent_form.html', {'form': form, 'action': 'Créer'})
+
+@login_required
+def edit_parent(request, parent_id):
+    if not request.user.is_superuser:
+        return redirect('home')
+        
+    parent = get_object_or_404(Parent, id=parent_id)
+    if request.method == 'POST':
+        form = ParentForm(request.POST, instance=parent)
+        if form.is_valid():
+            parent = form.save(commit=False)
+            if form.cleaned_data.get('password'):
+                parent.set_password(form.cleaned_data['password'])
+            parent.save()
+            messages.success(request, 'Parent modifié avec succès')
+            return redirect('admin_dashboard')
+    else:
+        form = ParentForm(instance=parent)
+    
+    return render(request, 'admin/parent_form.html', {'form': form, 'action': 'Modifier'})
+
+@login_required
+def create_student(request):
+    if not request.user.is_superuser:
+        return redirect('home')
+        
+    if request.method == 'POST':
+        form = StudentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Étudiant créé avec succès')
+            return redirect('admin_dashboard')
+    else:
+        form = StudentForm()
+    
+    return render(request, 'admin/student_form.html', {'form': form, 'action': 'Créer'})
+
+@login_required
+def edit_student(request, student_id):
+    if not request.user.is_superuser:
+        return redirect('home')
+        
+    student = get_object_or_404(Student, id=student_id)
+    if request.method == 'POST':
+        form = StudentForm(request.POST, instance=student)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Étudiant modifié avec succès')
+            return redirect('admin_dashboard')
+    else:
+        form = StudentForm(instance=student)
+    
+    return render(request, 'admin/student_form.html', {'form': form, 'action': 'Modifier'})

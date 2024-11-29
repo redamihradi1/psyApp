@@ -92,7 +92,7 @@ class Command(BaseCommand):
         }"""
         data = json.loads(json_data)['deuxAnsADeuxAnsCinqMois']
 
-        domains = ['CVP', 'LE', 'LR', 'MF', 'MG', 'IOM']
+        domains = ['CVP', 'LE', 'LR', 'MF', 'MG', 'IOM', 'EA', 'RS', 'CMC', 'CVC']
         count = 0
 
         for item in data:

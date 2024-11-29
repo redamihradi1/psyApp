@@ -55,23 +55,63 @@
 </form>
 
 <script>
-  document.querySelectorAll('.flex[id^="group_"]').forEach(group => {
-      const inputs = group.querySelectorAll('input[type="radio"]');
-      inputs.forEach(input => {
-          input.addEventListener('change', function() {
-              // Reset all labels in this group
-              group.querySelectorAll('.radio-label').forEach(label => {
-                  label.classList.remove('bg-green-500', 'text-white');
-                  label.classList.add('bg-white', 'text-gray-700');
-              });
-              
-              // Style selected label
-              if (this.checked) {
-                  this.nextElementSibling.classList.remove('bg-white', 'text-gray-700');
-                  this.nextElementSibling.classList.add('bg-green-500', 'text-white');
-              }
-          });
-      });
-  });
+    document.addEventListener('DOMContentLoaded', () => {
+        const formKey = 'questionnaire_{{ formulaire.id }}';
+        const savedData = JSON.parse(localStorage.getItem(formKey) || '{}');
+        
+        // Restore all saved data
+        if (savedData.student) {
+            document.querySelector('select[name="student"]').value = savedData.student;
+        }
+        
+        Object.entries(savedData).forEach(([key, value]) => {
+            if (key.startsWith('question_')) {
+                const input = document.querySelector(`input[name="${key}"][value="${value}"]`);
+                if (input) {
+                    input.checked = true;
+                    // Trigger style change
+                    const label = input.nextElementSibling;
+                    label.classList.remove('bg-white', 'text-gray-700');
+                    label.classList.add('bg-green-500', 'text-white');
+                }
+            }
+        });
+        
+        // Save data on any radio change
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const currentData = JSON.parse(localStorage.getItem(formKey) || '{}');
+                currentData[radio.name] = radio.value;
+                currentData.student = document.querySelector('select[name="student"]').value;
+                localStorage.setItem(formKey, JSON.stringify(currentData));
+            });
+        });
+    
+        // Save student selection on change
+        document.querySelector('select[name="student"]').addEventListener('change', (e) => {
+            const currentData = JSON.parse(localStorage.getItem(formKey) || '{}');
+            currentData.student = e.target.value;
+            localStorage.setItem(formKey, JSON.stringify(currentData));
+        });
+    });
+    
+    document.querySelectorAll('.flex[id^="group_"]').forEach(group => {
+        const inputs = group.querySelectorAll('input[type="radio"]');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Reset all labels in this group
+                group.querySelectorAll('.radio-label').forEach(label => {
+                    label.classList.remove('bg-green-500', 'text-white');
+                    label.classList.add('bg-white', 'text-gray-700');
+                });
+                
+                // Style selected label
+                if (this.checked) {
+                    this.nextElementSibling.classList.remove('bg-white', 'text-gray-700');
+                    this.nextElementSibling.classList.add('bg-green-500', 'text-white');
+                }
+            });
+        });
+    });
   </script>
 {% endblock %}
