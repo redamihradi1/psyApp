@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load vineland_filters %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-8 px-4">
+    <form method="post" action="?page={{ page_obj.number }}" class="bg-white shadow-lg rounded-lg p-6 space-y-6">
+        {% csrf_token %}
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Sélectionnez l'étudiant</label>
+            <select name="student" required class="w-full p-2 border rounded-md border-gray-300">
+                {% for student in students %}
+                    <option value="{{ student.id }}" 
+                            {% if initial_data.student == student.id|stringformat:"s" %}selected{% endif %}>
+                        {{ student.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        {% for question in page_obj %}
+        <div class="border-b border-gray-200 pb-6 last:border-0">
+            <div class="flex items-start mb-4">
+                <span class="text-sm font-medium text-gray-600 mr-2">{{ question.numero_item }}.</span>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-800">{{ question.texte }}</p>
+                    
+                    {% if question.note %}
+                        <div class="mt-2 pl-4 border-l-4 border-yellow-200">
+                            {% for note_line in question.note|split:'|' %}
+                                <p class="text-xs text-gray-600 italic">{{ note_line|safe }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <p class="text-xs text-gray-500 mt-1">
+                        <strong>{{ question.sous_domaine.domain.name }}</strong> - <span class="font-medium">{{ question.sous_domaine.name }}</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 mt-3" id="group_{{ question.numero_item }}">
+                <!-- Choix 0, 1, 2 -->
+                {% for value in "012"|make_list %}
+                    <label class="flex items-center">
+                        <input type="radio" 
+                               name="question_{{ question.numero_item }}"
+                               value="{{ value }}"
+                               class="hidden radio-input"
+                               {% if initial_data.question_|add:question.numero_item == value %}checked{% endif %}>
+                        <span class="px-4 py-2 border rounded cursor-pointer hover:bg-gray-50 radio-label">
+                            {{ value }}
+                        </span>
+                    </label>
+                {% endfor %}
+        
+                <!-- Choix NSP -->
+                <label class="flex items-center">
+                    <input type="radio" 
+                           name="question_{{ question.numero_item }}"
+                           value="NSP"
+                           class="hidden radio-input"
+                           {% if initial_data.question_|add:question.numero_item == 'NSP' %}checked{% endif %}>
+                    <span class="px-4 py-2 border rounded cursor-pointer hover:bg-gray-50 radio-label">
+                        NSP
+                    </span>
+                </label>
+        
+                <!-- Choix N/A (si permis) -->
+                {% if question.permet_na %}
+                    <label class="flex items-center">
+                        <input type="radio" 
+                               name="question_{{ question.numero_item }}"
+                               value="NA"
+                               class="hidden radio-input"
+                               {% if initial_data.question_|add:question.numero_item == 'NA' %}checked{% endif %}>
+                        <span class="px-4 py-2 border rounded cursor-pointer hover:bg-gray-50 radio-label">
+                            N/A
+                        </span>
+                    </label>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    
+        <div class="flex justify-between items-center mt-8">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" 
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                    Précédent
+                </a>
+            {% endif %}
+            
+            <span class="text-sm text-gray-600">
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+            </span>
+    
+            <button type="submit" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                {% if page_obj.has_next %}Suivant{% else %}Terminer{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const formKey = 'vineland_{{ formulaire.id }}';
+        const savedData = JSON.parse(localStorage.getItem(formKey) || '{}');
+        
+        if (savedData.student) {
+            document.querySelector('select[name="student"]').value = savedData.student;
+        }
+        
+        Object.entries(savedData).forEach(([key, value]) => {
+            if (key.startsWith('question_')) {
+                const input = document.querySelector(`input[name="${key}"][value="${value}"]`);
+                if (input) {
+                    input.checked = true;
+                    const label = input.nextElementSibling;
+                    label.classList.remove('bg-white', 'text-gray-700');
+                    label.classList.add('bg-green-500', 'text-white');
+                }
+            }
+        });
+        
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const currentData = JSON.parse(localStorage.getItem(formKey) || '{}');
+                currentData[radio.name] = radio.value;
+                currentData.student = document.querySelector('select[name="student"]').value;
+                localStorage.setItem(formKey, JSON.stringify(currentData));
+                
+                const label = radio.nextElementSibling;
+                const allLabels = radio.closest('.flex').querySelectorAll('.radio-label');
+                
+                allLabels.forEach(l => {
+                    l.classList.remove('bg-green-500', 'text-white');
+                    l.classList.add('bg-white', 'text-gray-700');
+                });
+                
+                label.classList.remove('bg-white', 'text-gray-700');
+                label.classList.add('bg-green-500', 'text-white');
+            });
+        });
+
+        document.querySelector('select[name="student"]').addEventListener('change', (e) => {
+            const currentData = JSON.parse(localStorage.getItem(formKey) || '{}');
+            currentData.student = e.target.value;
+            localStorage.setItem(formKey, JSON.stringify(currentData));
+        });
+    });
+</script>
+{% endblock %}

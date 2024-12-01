@@ -18,9 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from polls import views
 from polls import urls as questionnaire_urls  # Add this import
+from vineland import urls as vineland_urls  # Add this import
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path("", views.index, name="index"),
     path('', include('polls.urls')),  # Ensure this line is present
+    path('vineland/', include('vineland.urls')),
 ]
