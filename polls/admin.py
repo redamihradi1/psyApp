@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.apps import apps
 from django.contrib.auth.admin import UserAdmin
 from .models import Parent, Student, Formulaire, Domain, SousDomain, Question, Questionnaire , Response , AgeDeveloppeParametrage,DomaineResponse , SousDomaineResponse ,AgeTranche, ScoreParametrage, StudentScore ,NoteStandardPercentile
 
@@ -153,7 +154,7 @@ class ResponseAdmin(admin.ModelAdmin):
 class DomaineResponseAdmin(admin.ModelAdmin):
     list_display = ('id','domaine', 'questionnaire', 'score_total')
     list_filter = ('id','domaine', 'questionnaire', 'score_total')
-    search_fields = ('id','domaine__name', 'questionnaire__unique_key', 'score_total')
+    search_fields = ('id','domaine__name', 'questionnaire__unique_key', 'score_total')  
     ordering = ('id','questionnaire', 'domaine', 'score_total')
     fieldsets = (
         ('Domaine reponse infos', {'fields': ('domaine', 'questionnaire', 'score_total')}),
@@ -161,8 +162,8 @@ class DomaineResponseAdmin(admin.ModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('domaine', 'questionnaire', 'score_total')}
-        ),
+            'fields': ('domaine', 'questionnaire', 'score_total')})
+        ,
     )
 
 @admin.register(SousDomaineResponse)
@@ -236,12 +237,13 @@ class NoteStandardPercentileAdmin(admin.ModelAdmin):
     search_fields = ('domain', 'somme_score_standard', 'rang_percentile')
     ordering = ('domain', 'somme_score_standard')
     
-    # def has_delete_permission(self, request, obj=None):
-    #     # Empêcher la suppression accidentelle des données de référence
-    #     return False
-        
-    # def get_readonly_fields(self, request, obj=None):
-    #     # Rendre les champs en lecture seule après création
-    #     if obj:  # Si l'objet existe déjà
-    #         return ('domain', 'somme_score_standard')
-    #     return ()
+
+
+
+class CommunsAdminSite(admin.AdminSite):
+    site_header = 'Communs Administration'
+    site_title = 'Communs Administration'
+    index_title = 'Gestion des tests Communs'
+
+
+communs_admin = CommunsAdminSite(name='communs_admin')

@@ -43,7 +43,9 @@ class QuestionVineland(models.Model):
         (1, '1'),
         (2, '2'),
         ('NSP', 'Ne sais pas'),
-        ('NA', 'Non applicable')
+        ('NA', 'Non applicable'),
+        ('?', '?'),
+        ('', 'Non répondu')
     )
 
     texte = models.TextField(verbose_name="Question")
