@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .select2-container--default .select2-selection--single {
+        height: 42px;
+        padding: 6px;
+        border-color: rgb(209 213 219);
+      }
+
+      .select2-container--default
+        .select2-selection--single
+        .select2-selection__arrow {
+        height: 40px;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <nav class="bg-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <span class="text-xl font-bold text-gray-800">Questionnaire</span>
+            {% if request.user.is_superuser %}
+            <a
+              href="{% url 'admin_dashboard' %}"
+              class="ml-6 px-3 py-2 rounded-md text-sm font-medium text-gray-900"
+              >Admin Dashboard</a
+            >
+            {% endif %}
+            <a
+              href="/"
+              class="ml-6 px-3 py-2 rounded-md text-sm font-medium text-gray-900"
+              >Home</a
+            >
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-600"
+              >{{ request.user.username }}</span
+            >
+            <a
+              href="{% url 'logout' %}"
+              class="text-gray-600 hover:text-gray-900"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 px-4">
+      {% if messages %}
+      <div class="fixed top-4 right-4 z-50" id="alerts">
+        {% for message in messages %} {% comment %} check if success messag or
+        erro {% endcomment %} {% if message.tags == 'success' %}
+        <div
+          class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-md flex justify-between items-center"
+          role="alert"
+        >
+          <span>{{ message }}</span>
+          <button onclick="this.parentElement.remove()" class="ml-4">
+            &times;
+          </button>
+        </div>
+        {% elif message.tags == 'info' %}
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg
+                class="h-5 w-5 text-blue-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-blue-700">{{ message }}</p>
+            </div>
+          </div>
+        </div>
+        {% endif %} {% else %}
+        <div
+          class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md flex justify-between items-center"
+          role="alert"
+        >
+          <span>{{ message }}</span>
+          <button onclick="this.parentElement.remove()" class="ml-4">
+            &times;
+          </button>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+      {% endif %} {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
