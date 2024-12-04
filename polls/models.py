@@ -45,7 +45,7 @@ class Domain(models.Model):
 
 class SousDomain(models.Model):
     id = models.AutoField(primary_key=True)
-    domain = models.ForeignKey(Domain, on_delete=models.CASCADE, default='', verbose_name='Domaine')
+    domain = models.ForeignKey(Domain, on_delete=models.CASCADE, default='', verbose_name='Domaine' ,related_name='sous_domaines')
     name = models.CharField(max_length=255, default='', verbose_name='Nom du Sous-Domaine')
 
     def __str__(self):

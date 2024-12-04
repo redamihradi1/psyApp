@@ -1,0 +1,74 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold mb-2">Scores Vineland</h1>
+    <p class="text-gray-600">
+        Âge au moment du test: {{ age.years }} ans, {{ age.months }} mois, {{ age.days }} jours
+    </p>
+  </div>
+
+  {% for domain in complete_scores %}
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold mb-4 bg-gray-100 p-3">
+      {{ domain.name }}
+    </h2>
+
+    {% if domain.domain_score %}
+    <!-- Scores du domaine -->
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+      <h3 class="font-medium mb-3">Scores du domaine</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-2 border rounded">
+          <div class="text-sm text-gray-600">Somme des notes-V</div>
+          <div class="font-semibold">
+            {{ domain.domain_score.somme_notes_v }}
+          </div>
+        </div>
+        <div class="p-2 border rounded">
+          <div class="text-sm text-gray-600">Note standard</div>
+          <div class="font-semibold">
+            {{ domain.domain_score.note_standard }}
+          </div>
+        </div>
+        <div class="p-2 border rounded">
+          <div class="text-sm text-gray-600">Rang percentile</div>
+          <div class="font-semibold">
+            {{ domain.domain_score.rang_percentile }}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Scores des sous-domaines -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for sous_domain in domain.sous_domaines %}
+      <div class="border rounded p-4">
+        <h3 class="font-medium mb-3">{{ sous_domain.name }}</h3>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span>Note brute :</span>
+            <span class="font-medium">{{ sous_domain.note_brute }}</span>
+          </div>
+          <div class="flex justify-between border-t pt-2 mt-2">
+            <span class="font-semibold">Note échelle-V :</span>
+            <span class="font-semibold">{{ sous_domain.note_echelle_v }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  <div class="flex justify-center mt-8">
+    <a
+      href="{% url 'vineland:vineland_confidence_intervals' questionnaire.id %}"
+      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+    >
+      Voir les intervalles de confiance
+    </a>
+  </div>
+</div>
+
+{% endblock %}

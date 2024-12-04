@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold mb-2">Intervalles de confiance</h1>
+        <p class="text-gray-600">
+            Âge au moment du test: {{ age.years }} ans, {{ age.months }} mois, {{ age.days }} jours
+        </p>
+    </div>
+
+    {% for domain in complete_scores %}
+    <div class="mb-8">
+        <form method="get" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" id="form_{{ domain.name_slug }}">
+            <!-- Préserver les autres niveaux de confiance lors de la soumission -->
+            {% for other_domain in complete_scores %}
+                {% if other_domain.name != domain.name %}
+                    <input type="hidden" name="niveau_confiance_{{ other_domain.name_slug }}" 
+                           value="{{ other_domain.niveau_confiance }}">
+                {% endif %}
+            {% endfor %}
+
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">{{ domain.name }}</h2>
+                <div class="flex items-center">
+                    <label class="mr-2">Niveau de confiance:</label>
+                    <select name="niveau_confiance_{{ domain.name_slug }}" 
+                            onchange="document.getElementById('form_{{ domain.name_slug }}').submit()"
+                            class="shadow border rounded py-2 px-3 text-gray-700">
+                        <option value="95" {% if domain.niveau_confiance == 95 %}selected{% endif %}>95%</option>
+                        <option value="90" {% if domain.niveau_confiance == 90 %}selected{% endif %}>90%</option>
+                        <option value="85" {% if domain.niveau_confiance == 85 %}selected{% endif %}>85%</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        {% if domain.domain_score %}
+        <div class="bg-white shadow-md rounded-lg p-4 mb-6">
+            <h3 class="font-medium mb-3">Scores du domaine</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="p-2 border rounded">
+                    <div class="text-sm text-gray-600">Somme des notes-V</div>
+                    <div class="font-semibold">{{ domain.domain_score.somme_notes_v }}</div>
+                </div>
+                <div class="p-2 border rounded">
+                    <div class="text-sm text-gray-600">Note standard</div>
+                    <div class="font-semibold">{{ domain.domain_score.note_standard }}</div>
+                </div>
+                <div class="p-2 border rounded">
+                    <div class="text-sm text-gray-600">Rang percentile</div>
+                    <div class="font-semibold">{{ domain.domain_score.rang_percentile }}</div>
+                </div>
+                <div class="p-2 border rounded">
+                    <div class="text-sm text-gray-600">Intervalle</div>
+                    <div class="font-semibold">
+                        {% if domain.domain_score.intervalle %}
+                            ±{{ domain.domain_score.intervalle }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for sous_domain in domain.sous_domaines %}
+            <div class="border rounded p-4">
+                <h3 class="font-medium mb-3">{{ sous_domain.name }}</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between border-b pb-2">
+                        <span>Note brute :</span>
+                        <span class="font-medium">{{ sous_domain.note_brute }}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span>Note échelle-V :</span>
+                        <span class="font-medium">{{ sous_domain.note_echelle_v }}</span>
+                    </div>
+                    <div class="flex justify-between pt-2">
+                        <span class="font-semibold">Intervalle :</span>
+                        <span class="font-semibold">
+                            {% if sous_domain.intervalle %}
+                                ±{{ sous_domain.intervalle }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

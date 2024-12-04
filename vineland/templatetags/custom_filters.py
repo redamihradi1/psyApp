@@ -31,3 +31,17 @@ def format_age_range(plage):
     if plage.age_fin:
         return f"{plage.age_debut}-{plage.age_fin} ans"
     return f"{plage.age_debut}+ ans"
+
+@register.filter
+def multiply(value, arg):
+    return value * arg
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+@register.filter
+def items(dictionary):
+    if dictionary:
+        return dictionary.items()
+    return []

@@ -3,15 +3,29 @@
   <h2 class="text-2xl font-bold mb-6">Formulaires disponibles</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for formulaire in formulaires %}
+    {% if formulaire.title == 'PEP3'  %}
     <div class="bg-white rounded-lg shadow p-6">
       <h3 class="text-lg font-semibold mb-2">{{ formulaire.title }}</h3>
       <a
-        href="{% url 'questionnaire_view' formulaire.id %}"
-        class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      href="{% url 'questionnaire_view' formulaire.id %}"
+      class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
       >
-        Commencer
-      </a>
-    </div>
+      Commencer
+    </a>
+  </div>
+  {% elif formulaire.title == 'Vineland' %}
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-lg font-semibold mb-2">{{ formulaire.title }}</h3>
+    {% comment %} le on click affiche que c toutjur en cours de build {% endcomment %}
+    <a
+    href="#"
+    class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    onclick="alert('En cours de construction')"
+    >
+    Commencer
+  </a>
+</div>
+  {% endif %}
     {% endfor %}
   </div>
 
@@ -44,6 +58,7 @@
       </thead>
       <tbody class="divide-y divide-gray-200">
         {% for questionnaire in questionnaires %}
+        {% if questionnaire.formulaire.title == 'PEP3'  %}
         <tr>
           <td class="px-6 py-4">{{ questionnaire.formulaire.title }}</td>
           <td class="px-6 py-4">{{ questionnaire.student.name }}</td>
@@ -112,6 +127,7 @@
             </a>
           </td>
         </tr>
+        {% endif %}
         {% endfor %}
       </tbody>
     </table>

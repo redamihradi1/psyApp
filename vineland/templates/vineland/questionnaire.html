@@ -3,6 +3,9 @@
 {% load custom_filters %}
 
 {% block content %}
+
+    <form method="POST" id="vinelandForm">
+    {% csrf_token %}
 <div class="vineland-questionnaire container mx-auto px-4 py-6">
     {% if students %}
     <div class="student-selection mb-6">
@@ -15,9 +18,6 @@
         </select>
     </div>
     {% endif %}
-
-    <form method="POST" id="vinelandForm">
-        {% csrf_token %}
         
         {% regroup page_obj.object_list by sous_domaine.domain as domain_list %}
         
