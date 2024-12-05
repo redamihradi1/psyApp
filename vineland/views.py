@@ -42,7 +42,7 @@ def vineland_questionnaire(request, formulaire_id):
         else:
             question.plage_age = None
 
-    paginator = Paginator(questions, 10)
+    paginator = Paginator(questions, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
