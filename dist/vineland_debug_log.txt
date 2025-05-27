@@ -1,0 +1,7 @@
+[2025-05-27 20:01:32] Lancement de l'application Vineland-II
+[2025-05-27 20:01:32] Dossier de base : C:\Users\PC\AppData\Local\Temp\_MEI116562
+[2025-05-27 20:01:32] Copie initiale de la base de données
+[2025-05-27 20:01:32] IP locale : 192.168.11.112
+[2025-05-27 20:01:32] Démarrage du serveur Django
+[2025-05-27 20:01:32] Exécution des migrations
+[2025-05-27 20:01:35] Ouverture navigateur : http://192.168.11.112:8000/

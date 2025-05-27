@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load vineland_extras %}
+{% block content %}
+
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold mb-2">Import des comparaisons de sous-domaines (Table D.3)</h1>
+    
+    {% if error %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <p>{{ error }}</p>
+    </div>
+    {% endif %}
+    
+    {% if success %}
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+      <p>{{ success }}</p>
+    </div>
+    {% endif %}
+    
+    {% if info %}
+    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
+      <p>{{ info }}</p>
+    </div>
+    {% endif %}
+    
+    <div id="notification" class="hidden px-4 py-3 rounded mb-4"></div>
+    
+    <p class="text-gray-600 mb-4">
+      Cette page vous permet d'importer les données de comparaison des sous-domaines (Table D.3) dans la base de données.
+      <strong>Vous pouvez modifier les valeurs directement dans les cellules si nécessaire.</strong>
+    </p>
+    
+    <form method="post" class="mb-4" id="import-form">
+      {% csrf_token %}
+      <input type="hidden" name="modified_data" id="modified-data-input">
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Importer les données
+      </button>
+    </form>
+  </div>
+
+  <!-- Onglets des tranches d'âge -->
+  <div class="mb-4">
+    <div class="flex border-b">
+      {% for age in age_ranges %}
+      <button class="age-tab py-2 px-4 mr-2 {% if forloop.first %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %}" 
+              data-age="{{ age }}">
+        {{ age }} ans
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Tableaux pour chaque tranche d'âge -->
+  {% for age in age_ranges %}
+  <div id="age-{{ age }}" class="age-content {% if not forloop.first %}hidden{% endif %} overflow-x-auto mb-6">
+    <h2 class="text-xl font-bold mb-2">Différence requise pour la tranche {{ age }} ans</h2>
+    <p class="text-sm text-gray-600 mb-4">Les valeurs au-dessus de la diagonale (cellules vertes) correspondent au niveau de significativité .05.<br>
+    Les valeurs au-dessous de la diagonale (cellules roses) correspondent au niveau de significativité .01.</p>
+    
+    <table class="min-w-full bg-white border text-center">
+      <thead>
+        <tr>
+          <th class="border p-2"></th>
+          {% for sd in sous_domaines %}
+          <th class="border p-2">{{ sd }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for sd1 in sous_domaines %}
+        <tr>
+          <th class="border p-2 bg-gray-100 font-bold">{{ sd1 }}</th>
+          {% for sd2 in sous_domaines %}
+            {% if sd1 == sd2 %}
+              <td class="border p-2 bg-gray-200">—</td>
+            {% else %}
+              <td class="border p-2 {% if values|get_item:age and values|get_item:age|get_item:sd1 and values|get_item:age|get_item:sd1|get_item:sd2 %}
+                            {% if values|get_item:age|get_item:sd1|get_item:sd2|get_item:'05' %}bg-green-100{% else %}bg-pink-100{% endif %}
+                           {% endif %}">
+                {% if values|get_item:age and values|get_item:age|get_item:sd1 and values|get_item:age|get_item:sd1|get_item:sd2 %}
+                  {% if values|get_item:age|get_item:sd1|get_item:sd2|get_item:'05' %}
+                    <input type="text" 
+                           class="cell-edit w-10 text-center bg-transparent border-b border-dashed border-gray-400"
+                           data-age="{{ age }}"
+                           data-sd1="{{ sd1 }}"
+                           data-sd2="{{ sd2 }}"
+                           data-level="05"
+                           value="{{ values|get_item:age|get_item:sd1|get_item:sd2|get_item:'05' }}">
+                  {% elif values|get_item:age|get_item:sd1|get_item:sd2|get_item:'01' %}
+                    <input type="text" 
+                           class="cell-edit w-10 text-center bg-transparent border-b border-dashed border-gray-400"
+                           data-age="{{ age }}"
+                           data-sd1="{{ sd1 }}"
+                           data-sd2="{{ sd2 }}"
+                           data-level="01"
+                           value="{{ values|get_item:age|get_item:sd1|get_item:sd2|get_item:'01' }}">
+                  {% else %}
+                    <input type="text" 
+                           class="cell-edit w-10 text-center bg-transparent border-b border-dashed border-gray-400"
+                           data-age="{{ age }}"
+                           data-sd1="{{ sd1 }}"
+                           data-sd2="{{ sd2 }}"
+                           data-level="{% if sd1 < sd2 %}05{% else %}01{% endif %}"
+                           value="">
+                  {% endif %}
+                {% else %}
+                  <input type="text" 
+                         class="cell-edit w-10 text-center bg-transparent border-b border-dashed border-gray-400"
+                         data-age="{{ age }}"
+                         data-sd1="{{ sd1 }}"
+                         data-sd2="{{ sd2 }}"
+                         data-level="{% if sd1 < sd2 %}05{% else %}01{% endif %}"
+                         value="">
+                {% endif %}
+              </td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+  
+  <div class="mt-6">
+    <p class="text-sm text-gray-600">
+      Une fois les données importées, vous pourrez les modifier via l'interface des tableaux éditables.
+      {% comment %} <a href="{% url 'tableau_comparaisons_default' %}" class="text-blue-500 hover:underline">Accéder aux tableaux éditables</a> {% endcomment %}
+    </p>
+  </div>
+</div>
+
+{{ values|json_script:"values-data" }}
+
+<script>
+  // Script pour les onglets
+  document.addEventListener('DOMContentLoaded', function() {
+    // Stocker les données initiales
+    let initialData = {};
+    try {
+      initialData = JSON.parse(document.getElementById('values-data').textContent);
+    } catch (e) {
+      console.error("Erreur lors du chargement des données initiales:", e);
+      initialData = {};
+    }
+    
+    // Créer un objet pour stocker les modifications
+    let modifiedData = JSON.parse(JSON.stringify(initialData));
+    
+    // Fonction pour afficher les notifications
+    function showNotification(message, type) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.classList.remove('hidden', 'bg-green-100', 'bg-red-100', 'text-green-700', 'text-red-700', 'border-green-400', 'border-red-400');
+      
+      if (type === 'success') {
+        notification.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-400');
+      } else if (type === 'error') {
+        notification.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-400');
+      }
+      
+      // Cacher la notification après 3 secondes
+      setTimeout(function() {
+        notification.classList.add('hidden');
+      }, 3000);
+    }
+    
+    // Gérer les onglets
+    const ageTabs = document.querySelectorAll('.age-tab');
+    const ageContents = document.querySelectorAll('.age-content');
+    
+    ageTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Désactiver tous les onglets
+        ageTabs.forEach(t => {
+          t.classList.remove('bg-blue-500', 'text-white');
+          t.classList.add('bg-gray-200');
+        });
+        
+        // Activer l'onglet cliqué
+        this.classList.remove('bg-gray-200');
+        this.classList.add('bg-blue-500', 'text-white');
+        
+        // Cacher tous les contenus
+        ageContents.forEach(content => {
+          content.classList.add('hidden');
+        });
+        
+        // Afficher le contenu correspondant
+        const age = this.getAttribute('data-age');
+        document.getElementById('age-' + age).classList.remove('hidden');
+      });
+    });
+    
+    // Gérer les cellules éditables
+    const cells = document.querySelectorAll('.cell-edit');
+    cells.forEach(cell => {
+      cell.addEventListener('change', function() {
+        const age = this.getAttribute('data-age');
+        const sd1 = this.getAttribute('data-sd1');
+        const sd2 = this.getAttribute('data-sd2');
+        const level = this.getAttribute('data-level');
+        const value = this.value.trim();
+        
+        // Vérifier si la valeur est un nombre ou vide
+        if (value !== '' && isNaN(parseInt(value))) {
+          showNotification('La valeur doit être un nombre entier.', 'error');
+          this.value = ''; // Réinitialiser la valeur
+          return;
+        }
+        
+        // Initialiser la structure si nécessaire
+        if (!modifiedData[age]) modifiedData[age] = {};
+        if (!modifiedData[age][sd1]) modifiedData[age][sd1] = {};
+        if (!modifiedData[age][sd1][sd2]) modifiedData[age][sd1][sd2] = {};
+        
+        // Mettre à jour la valeur
+        if (value === '') {
+          modifiedData[age][sd1][sd2][level] = null;
+        } else {
+          modifiedData[age][sd1][sd2][level] = parseInt(value);
+        }
+        
+        // Mettre à jour la couleur de la cellule
+        const cell = this.parentNode;
+        if (level === '05') {
+          cell.classList.remove('bg-pink-100');
+          if (value !== '') {
+            cell.classList.add('bg-green-100');
+          } else {
+            cell.classList.remove('bg-green-100');
+          }
+        } else if (level === '01') {
+          cell.classList.remove('bg-green-100');
+          if (value !== '') {
+            cell.classList.add('bg-pink-100');
+          } else {
+            cell.classList.remove('bg-pink-100');
+          }
+        }
+        
+        showNotification('Modification enregistrée.', 'success');
+      });
+    });
+    
+    // Gérer le formulaire d'importation
+    const importForm = document.getElementById('import-form');
+    const modifiedDataInput = document.getElementById('modified-data-input');
+    
+    importForm.addEventListener('submit', function(e) {
+      // Mettre à jour le champ caché avec les données modifiées
+      modifiedDataInput.value = JSON.stringify(modifiedData);
+    });
+  });
+</script>
+
+{% endblock %}

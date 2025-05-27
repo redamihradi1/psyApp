@@ -1,0 +1,251 @@
+{% extends 'base.html' %} 
+{% block content %}
+
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold mb-2">Comparaisons par paires Vineland-II</h1>
+    <p class="text-gray-600">
+      Âge au moment du test: {{ age.years }} ans, {{ age.months }} mois,
+      {{ age.days }} jours
+    </p>
+    <div class="mb-4 mt-4">
+      <form method="get" class="flex items-center space-x-4">
+        <label class="font-medium">Niveau de significativité:</label>
+        <select name="niveau_significativite" class="border rounded px-3 py-2">
+          <option value=".05" {% if niveau_significativite == '.05' %}selected{% endif %}>.05</option>
+          <option value=".01" {% if niveau_significativite == '.01' %}selected{% endif %}>.01</option>
+        </select>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+          Appliquer
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Comparaisons des domaines -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold bg-gray-100 p-3 rounded mb-4">
+      Comparaisons des domaines
+    </h2>
+
+    <table class="min-w-full bg-white border">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border p-2">Domaine 1</th>
+          <th class="border p-2">Note standard</th>
+          <th class="border p-2 bg-gray-200">&lt;, >, ou =</th>
+          <th class="border p-2">Note standard</th>
+          <th class="border p-2">Domaine 2</th>
+          <th class="border p-2">Différence</th>
+          <th class="border p-2">
+            Significativité<br />(.05 ou .01)
+          </th>
+          <th class="border p-2">
+            Fréquence<br />(16, 10, 5%)
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comparison in domain_comparisons %}
+        <tr>
+          <td class="border p-2">{{ comparison.domaine1 }}</td>
+          <td class="border p-2">{{ comparison.note1 }}</td>
+          <td class="border p-2 bg-gray-200">{{ comparison.signe }}</td>
+          <td class="border p-2">{{ comparison.note2 }}</td>
+          <td class="border p-2">{{ comparison.domaine2 }}</td>
+          <td class="border p-2">{{ comparison.difference }}</td>
+          <td class="border p-2">
+            {% if comparison.est_significatif %}
+              {% comment %} {{ comparison.difference_requise }} {% endcomment %}
+              <span class="text-green-600 font-bold">✓</span>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="border p-2">
+            {% if comparison.frequence %}
+              {{ comparison.frequence }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Comparaisons des sous-domaines par domaine -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold bg-gray-100 p-3 rounded mb-4">
+      Comparaisons des sous-domaines
+    </h2>
+
+    {% for domaine, comparisons in sous_domaine_comparisons.items %}
+    <div class="mt-4 mb-6">
+      <h3 class="font-medium mb-3 bg-blue-100 p-2">{{ domaine }}</h3>
+      <table class="min-w-full bg-white border">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border p-2">Sous-domaine 1</th>
+            <th class="border p-2">Note d'échelle-v</th>
+            <th class="border p-2 bg-gray-200">&lt;, >, ou =</th>
+            <th class="border p-2">Note d'échelle-v</th>
+            <th class="border p-2">Sous-domaine 2</th>
+            <th class="border p-2">
+              Différence
+            </th>
+            <th class="border p-2">
+              Significativité<br />(.05 ou .01)
+            </th>
+            <th class="border p-2">
+              Fréquence<br />(16, 10, 5%)
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comparison in comparisons %}
+          <tr>
+            <td class="border p-2">{{ comparison.sous_domaine1 }}</td>
+            <td class="border p-2">{{ comparison.note1 }}</td>
+            <td class="border p-2 bg-gray-200">{{ comparison.signe }}</td>
+            <td class="border p-2">{{ comparison.note2 }}</td>
+            <td class="border p-2">{{ comparison.sous_domaine2 }}</td>
+            <td class="border p-2">{{ comparison.difference }}</td>
+            <td class="border p-2">
+              {% if comparison.est_significatif %}
+                {% comment %} {{ comparison.difference_requise}} {% endcomment %}
+                <span class="text-green-600 font-bold">✓</span>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="border p-2">
+              {% if comparison.frequence %}
+                {{ comparison.frequence }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- NOUVELLE SECTION: Comparaisons des sous-domaines inter-domaines -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold bg-gray-100 p-3 rounded mb-4">
+      Comparaisons des sous-domaines inter-domaines
+    </h2>
+
+    <table class="min-w-full bg-white border">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border p-2">Sous-domaine 1</th>
+          <th class="border p-2">Domaine</th>
+          <th class="border p-2">Note d'échelle-v</th>
+          <th class="border p-2 bg-gray-200">&lt;, >, ou =</th>
+          <th class="border p-2">Note d'échelle-v</th>
+          <th class="border p-2">Sous-domaine 2</th>
+          <th class="border p-2">Domaine</th>
+          <th class="border p-2">Différence</th>
+          <th class="border p-2">
+            Significativité<br />(.05 ou .01)
+          </th>
+          <th class="border p-2">
+            Fréquence<br />(16, 10, 5%)
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comparison in interdomaine_comparisons %}
+        <tr>
+          <td class="border p-2">{{ comparison.sous_domaine1 }}</td>
+          <td class="border p-2">{{ comparison.domaine1 }}</td>
+          <td class="border p-2">{{ comparison.note1 }}</td>
+          <td class="border p-2 bg-gray-200">{{ comparison.signe }}</td>
+          <td class="border p-2">{{ comparison.note2 }}</td>
+          <td class="border p-2">{{ comparison.sous_domaine2 }}</td>
+          <td class="border p-2">{{ comparison.domaine2 }}</td>
+          <td class="border p-2">{{ comparison.difference }}</td>
+          <td class="border p-2">
+            {% if comparison.est_significatif %}
+              {% comment %} {{ comparison.difference_requise }} {% endcomment %}
+              <span class="text-green-600 font-bold">✓</span>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="border p-2">
+            {% if comparison.frequence %}
+              {{ comparison.frequence }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sélection de comparaisons - fonctionnalité optionnelle -->
+  {% if selection_comparisons %}
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold bg-gray-100 p-3 rounded mb-4">
+      Sélection de comparaisons
+    </h2>
+    
+    <table class="min-w-full bg-white border">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border p-2">Sous-domaine 1</th>
+          <th class="border p-2">Note d'échelle-v</th>
+          <th class="border p-2 bg-gray-200">&lt;, >, ou =</th>
+          <th class="border p-2">Note d'échelle-v</th>
+          <th class="border p-2">Sous-domaine 2</th>
+          <th class="border p-2">Différence</th>
+          <th class="border p-2">
+            Significativité<br />(.05 ou .01)
+          </th>
+          <th class="border p-2">
+            Fréquence<br />(16, 10, 5%)
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comparison in selection_comparisons %}
+        <tr>
+          <td class="border p-2">{{ comparison.sous_domaine1 }}</td>
+          <td class="border p-2">{{ comparison.note1 }}</td>
+          <td class="border p-2 bg-gray-200">{{ comparison.signe }}</td>
+          <td class="border p-2">{{ comparison.note2 }}</td>
+          <td class="border p-2">{{ comparison.sous_domaine2 }}</td>
+          <td class="border p-2">{{ comparison.difference }}</td>
+          <td class="border p-2">
+            {% if comparison.est_significatif %}
+              {% comment %} {{ niveau_significativite }} {% endcomment %}
+              <span class="text-green-600 font-bold">✓</span>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="border p-2">
+            {% if comparison.frequence %}
+              {{ comparison.frequence }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

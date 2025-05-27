@@ -1,0 +1,325 @@
+{% load dict_extras %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intervalles de confiance pour les notes d'échelle-V des sous-domaines</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .table-container {
+            overflow-x: auto;
+            border: 2px solid #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        th, td {
+            border: 1px solid #666;
+            padding: 4px 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #e6e6e6;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        .age-header {
+            background-color: #d0d0d0;
+            font-weight: bold;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            width: 25px;
+        }
+        .niveau-header {
+            background-color: #e0e0e0;
+            font-size: 9px;
+            width: 30px;
+        }
+        .sous-domaine-header {
+            background-color: #d8d8d8;
+            font-size: 8px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            height: 100px;
+            min-width: 35px;
+            font-weight: bold;
+        }
+        .editable-cell {
+            background-color: white;
+            position: relative;
+        }
+        .editable-input {
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 100%;
+            padding: 2px;
+            font-size: 11px;
+        }
+        .editable-input:focus {
+            background-color: #fff3cd;
+            outline: 2px solid #ffc107;
+        }
+        .error {
+            background-color: #ffebee !important;
+        }
+        .success {
+            background-color: #e8f5e8 !important;
+        }
+        .loading {
+            background-color: #f0f0f0 !important;
+        }
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+        }
+        .status-success {
+            background-color: #28a745;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .legend h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .legend p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Intervalles de confiance pour les notes d'échelle-V des sous-domaines</h1>
+        
+        <div class="controls">
+            <button class="btn" onclick="saveAllChanges()">Sauvegarder toutes les modifications</button>
+            <button class="btn btn-success" onclick="exportData()">Exporter les données</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="age-header">Âge</th>
+                        <th rowspan="2" class="niveau-header">Niveau de confiance (%)</th>
+                        {% for sous_domaine in sous_domaines %}
+                        <th class="sous-domaine-header">
+                            {% if sous_domaine.name == "Relations interpersonnelles" %}
+                                Relations inter-personnelles
+                            {% elif sous_domaine.name == "Jeu et temps libre" %}
+                                Jeu et temps libre
+                            {% else %}
+                                {{ sous_domaine.name }}
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                        <th rowspan="2" class="age-header">Âge</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for age_code, age_display in tranches_age %}
+                        {% for niveau_code, niveau_display in niveaux_confiance %}
+                        <tr>
+                            {% if forloop.first %}
+                            <td rowspan="{{ niveaux_confiance|length }}" class="age-header">{{ age_display }}</td>
+                            {% endif %}
+                            
+                            <td class="niveau-header">{{ niveau_code }}</td>
+                            
+                            {% for sous_domaine in sous_domaines %}
+                            <td class="editable-cell">
+                                {% with data_structure|default_if_none:''|lookup:age_code|lookup:niveau_code|lookup:sous_domaine.id as valeur %}
+                                <input type="number" 
+                                       class="editable-input" 
+                                       value="{% if valeur %}{{ valeur }}{% endif %}"
+                                       data-age="{{ age_code }}"
+                                       data-niveau="{{ niveau_code }}"
+                                       data-sous-domaine="{{ sous_domaine.id }}"
+                                       onchange="updateValue(this)"
+                                       placeholder="±">
+                                {% endwith %}
+                            </td>
+                            {% endfor %}
+                            
+                            {% if forloop.first %}
+                            <td rowspan="{{ niveaux_confiance|length }}" class="age-header">{{ age_display }}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="legend">
+            <h3>Instructions d'utilisation</h3>
+            <p><strong>•</strong> Cliquez sur une cellule pour modifier la valeur de l'intervalle de confiance</p>
+            <p><strong>•</strong> Les valeurs sont automatiquement sauvegardées lors de la modification</p>
+            <p><strong>•</strong> Laissez vide pour supprimer une entrée</p>
+            <p><strong>•</strong> Les valeurs doivent être des nombres entiers positifs (ex: 2 pour ±2)</p>
+        </div>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <script>
+        // Fonction pour mettre à jour une valeur
+        function updateValue(input) {
+            const cell = input.parentElement;
+            const age = input.dataset.age;
+            const niveau = input.dataset.niveau;
+            const sousDomaineId = input.dataset.sousDomaine;
+            const valeur = input.value.trim();
+
+            // Ajouter une classe de chargement
+            cell.classList.add('loading');
+            cell.classList.remove('error', 'success');
+
+            // Préparer les données à envoyer
+            const data = {
+                age: age,
+                niveau_confiance: niveau,
+                sous_domaine_id: sousDomaineId,
+                valeur: valeur === '' ? null : valeur
+            };
+
+            // Envoyer la requête AJAX
+            fetch('/vineland/intervalle-confiance/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                cell.classList.remove('loading');
+                
+                if (data.success) {
+                    cell.classList.add('success');
+                    showMessage(data.message, 'success');
+                    
+                    // Retirer la classe success après 2 secondes
+                    setTimeout(() => {
+                        cell.classList.remove('success');
+                    }, 2000);
+                } else {
+                    cell.classList.add('error');
+                    showMessage(data.error, 'error');
+                    
+                    // Retirer la classe error après 5 secondes
+                    setTimeout(() => {
+                        cell.classList.remove('error');
+                    }, 5000);
+                }
+            })
+            .catch(error => {
+                cell.classList.remove('loading');
+                cell.classList.add('error');
+                showMessage('Erreur de connexion', 'error');
+                console.error('Error:', error);
+            });
+        }
+
+        // Fonction pour afficher les messages de statut
+        function showMessage(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.style.display = 'block';
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Fonction pour obtenir le token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Fonction pour sauvegarder toutes les modifications (placeholder)
+        function saveAllChanges() {
+            showMessage('Toutes les modifications sont automatiquement sauvegardées', 'success');
+        }
+
+        // Fonction pour exporter les données
+        function exportData() {
+            window.location.href = '/vineland/intervalle-confiance/export/';
+        }
+
+        // Ajouter un filtre personnalisé pour les templates Django
+        // Cette partie doit être ajoutée dans votre fichier templatetags
+    </script>
+</body>
+</html>

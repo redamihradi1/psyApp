@@ -1,0 +1,261 @@
+{% extends '../base.html' %} {% load custom_filters %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">
+    Résultats du Score - {{ questionnaire.student.name }}
+  </h1>
+
+  <!-- Premier tableau - Résultat Final -->
+  <div class="bg-white shadow rounded-lg mb-8 overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b">
+      <h2 class="text-xl font-semibold">
+        Résultats Détaillés par Sous-Domaine
+      </h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Domaine
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Sous-Domaine
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Score Brut
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Âge Développé
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              %ile
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Niveau dévelopé/ Adaptatif
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for resultat in resultat_final %}
+          <tr class="hover:bg-gray-50">
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+            >
+              {{ resultat.domaine }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.label }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.total }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.age_developpe | default:"-" }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ resultat.percentile }}
+            </td>
+
+            <td
+              class="px-3 py-3 text-sm text-center bg-gray-50 {% if resultat.niveau == 'Approprié' %}text-green-600 font-medium {% elif resultat.niveau == 'Léger' %}text-yellow-600 font-medium {% elif resultat.niveau == 'Modéré' %}text-orange-600 font-medium {% elif resultat.niveau == 'Sévère' %}text-red-600 font-medium {% else %}text-gray-600{% endif %}"
+            >
+              {{ resultat.niveau|default:"-" }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Deuxième tableau - Synthèse par Domaine -->
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+    <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+      <h2 class="text-xl font-bold text-gray-800">Synthèse par Domaine</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr class="bg-gray-50">
+            <th
+              class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 bg-gray-50"
+            >
+              Domaine
+            </th>
+            <th
+              title="Cognition Verbale/Préverbale"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              CVP
+            </th>
+            <th
+              title="Langage Expressif"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              LE
+            </th>
+            <th
+              title="Langage Réceptif"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              LR
+            </th>
+            <th
+              title="Motricité Fine"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              MF
+            </th>
+            <th
+              title="Motricité Globale"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              MG
+            </th>
+            <th
+              title="Imitation Oculo-Motrice"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              IOM
+            </th>
+            <th
+              title="Expression Affective"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              EA
+            </th>
+            <th
+              title="Réciprocité Sociale"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              RS
+            </th>
+            <th
+              title="Comportements Moteurs Caractéristiques"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              CMC
+            </th>
+            <th
+              title="Comportements Verbaux Caractéristiques"
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              CVC
+            </th>
+            <th
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-100"
+            >
+              Somme NS
+            </th>
+            <th
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-100"
+            >
+              %ile
+            </th>
+            <th
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-100"
+            >
+              Niveau dévelopé/ Adaptatif
+            </th>
+            <th
+              class="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-100"
+            >
+              Âge Dév.
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for tableau in deuxieme_tableau %}
+          <tr class="hover:bg-gray-50 transition-colors duration-150">
+            <td
+              class="px-3 py-3 text-sm font-medium text-gray-900 sticky left-0 bg-white"
+            >
+              {{ tableau.domaine }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.CVP|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.LE|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.LR|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.MF|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.MG|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.IOM|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.EA|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.RS|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.CMC|default:"-" }}
+            </td>
+            <td class="px-3 py-3 text-sm text-center text-gray-600">
+              {{ tableau.CVC|default:"-" }}
+            </td>
+            <td
+              class="px-3 py-3 text-sm text-center font-medium bg-gray-50 text-gray-800"
+            >
+              {{ tableau.somme_ns|default:"0" }}
+            </td>
+            <td
+              class="px-3 py-3 text-sm text-center font-medium bg-gray-50 text-gray-800"
+            >
+              {{ tableau.percentile|default:"-" }}
+            </td>
+            <td
+              class="px-3 py-3 text-sm text-center bg-gray-50 {% if tableau.niveau == 'Approprié' %}text-green-600 font-medium {% elif tableau.niveau == 'Léger' %}text-yellow-600 font-medium {% elif tableau.niveau == 'Modéré' %}text-orange-600 font-medium {% elif tableau.niveau == 'Sévère' %}text-red-600 font-medium {% else %}text-gray-600{% endif %}"
+            >
+              {{ tableau.niveau|default:"-" }}
+            </td>
+            <td
+              class="px-3 py-3 text-sm text-center font-medium bg-gray-50 text-gray-800"
+            >
+              {{tableau.age_developpe|default:"-"}}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Boutons de navigation -->
+  <div class="mt-8 flex justify-between">
+    <a
+      href="{% url 'home' %}"
+      class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+    >
+      Retour à l'accueil
+    </a>
+    <button
+      onclick="window.print()"
+      class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
+    >
+      Imprimer les résultats
+    </button>
+  </div>
+</div>
+{% endblock %}

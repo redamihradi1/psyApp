@@ -1,0 +1,99 @@
+{% extends '../base.html' %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">
+    Détail des Réponses - {{ questionnaire.student.name }}
+  </h1>
+
+  {% for domain_data in summary_data %}
+  <div class="bg-white shadow rounded-lg mb-8">
+    <div class="bg-gray-50 px-6 py-4 border-b">
+      <h2 class="text-xl font-semibold">{{ domain_data.domain }}</h2>
+    </div>
+
+    {% for sous_domain in domain_data.sous_domains %}
+    <div
+      class="p-6 border-b"
+      id="sous-domain-{{ forloop.parentloop.counter }}-{{ forloop.counter }}"
+    >
+      <h3 class="text-lg font-medium mb-4">{{ sous_domain.name }}</h3>
+
+      <div class="mb-4">
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex space-x-8" role="tablist">
+            {% for answer, questions in sous_domain.responses.items %}
+            <button
+              class="{% if forloop.first %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500{% endif %} hover:text-blue-700 whitespace-nowrap py-4 px-1 border-b-2 font-medium cursor-pointer"
+              data-tab="tab-{{ forloop.parentloop.parentloop.counter }}-{{ forloop.parentloop.counter }}-{{ answer }}"
+              role="tab"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            >
+              Réponses {{ answer }} ({{ questions|length }})
+            </button>
+            {% endfor %}
+          </nav>
+        </div>
+
+        <div class="mt-4 space-y-4">
+          {% for answer, questions in sous_domain.responses.items %}
+          <div
+            id="tab-{{ forloop.parentloop.parentloop.counter }}-{{ forloop.parentloop.counter }}-{{ answer }}"
+            class="{% if not forloop.first %}hidden{% endif %} tab-content"
+            role="tabpanel"
+          >
+            <ul class="list-disc pl-5 space-y-2">
+              {% for response in questions %}
+              <li class="text-gray-700">{{ response.question.text }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <div class="mt-6">
+    <a
+      href="{% url 'home' %}"
+      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+    >
+      Retour à l'accueil
+    </a>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll('[role="tab"]');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", function () {
+        const tabContainer = this.closest(".mb-4");
+
+        // Hide all tab content
+        tabContainer.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
+          panel.classList.add("hidden");
+        });
+
+        // Remove active state from all tabs
+        tabContainer.querySelectorAll('[role="tab"]').forEach((t) => {
+          t.classList.remove("border-blue-500", "text-blue-600");
+          t.classList.add("border-transparent", "text-gray-500");
+          t.setAttribute("aria-selected", "false");
+        });
+
+        // Show selected tab content
+        const targetId = this.getAttribute("data-tab");
+        document.getElementById(targetId).classList.remove("hidden");
+
+        // Set active state on clicked tab
+        this.classList.remove("border-transparent", "text-gray-500");
+        this.classList.add("border-blue-500", "text-blue-600");
+        this.setAttribute("aria-selected", "true");
+      });
+    });
+  });
+</script>
+{% endblock %}

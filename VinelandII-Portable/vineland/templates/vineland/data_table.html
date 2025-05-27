@@ -1,0 +1,99 @@
+{% extends "base.html" %} 
+{% load vineland_tags %} 
+
+{% block content %}
+<div class="p-4">
+  <div class="mb-4 flex justify-between items-center">
+    <h2 class="text-lg font-medium">Données pour la plage {{ age_range }}</h2>
+    <a href="{% url 'vineland:verify_data' %}" class="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200">
+      Nouvelle recherche
+    </a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse border border-gray-300">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 p-1 bg-gray-50">Note</th>
+          {% for sous_domaine in sous_domaines %}
+            <th class="border border-gray-300 p-1 bg-gray-50">{{ sous_domaine }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for note in data.keys %}
+        <tr>
+          <td class="border border-gray-300 p-1">{{ note }}</td>
+          {% for sous_domaine in sous_domaines %}
+          <td class="border border-gray-300 p-1">
+            <div class="editable-cell" data-note="{{ note }}" data-domaine="{{ sous_domaine }}">
+              <span class="cell-value cursor-pointer hover:bg-gray-100">
+                {{ data|get_item:note|get_item:sous_domaine|default:"-" }}
+              </span>
+              <div class="cell-edit hidden">
+                <input type="text" class="w-16 p-0 text-sm border"
+                       value="{{ data|get_item:note|get_item:sous_domaine|default:'' }}">
+                <button class="save-btn ml-1 px-1 bg-blue-500 text-white text-xs rounded">✓</button>
+              </div>
+            </div>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cells = document.querySelectorAll(".editable-cell");
+
+    cells.forEach((cell) => {
+      const value = cell.querySelector(".cell-value");
+      const editDiv = cell.querySelector(".cell-edit");
+      const input = editDiv.querySelector("input");
+      const saveBtn = editDiv.querySelector(".save-btn");
+
+      value.addEventListener("click", () => {
+        value.classList.add("hidden");
+        editDiv.classList.remove("hidden");
+        input.focus();
+      });
+
+      saveBtn.addEventListener("click", async () => {
+        const newValue = input.value.trim();
+        const note = cell.dataset.note;
+        const domaine = cell.dataset.domaine;
+        const ageRange = "{{ age_range }}";  // Récupérer la plage d'âge du contexte
+    
+        try {
+            const response = await fetch("/vineland/update-mapping/", {
+                method: "POST",
+                body: JSON.stringify({
+                    note_echelle_v: note,
+                    sous_domaine: domaine,
+                    value: newValue,
+                    age_range: ageRange  // Ajouter la plage d'âge
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+    
+            const data = await response.json();
+            if (data.status === "success") {
+                value.textContent = newValue || "-";
+                value.classList.remove("hidden");
+                editDiv.classList.add("hidden");
+            } else {
+                alert("Erreur lors de la mise à jour: " + data.message);
+            }
+        } catch (error) {
+            alert("Erreur lors de la mise à jour");
+        }
+    });
+    });
+  });
+</script>
+{% endblock %}
