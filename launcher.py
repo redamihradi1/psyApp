@@ -17,7 +17,7 @@ def get_app_dir():
 def create_log(message):
     """Écrit dans un fichier log"""
     log_path = os.path.join(get_app_dir(), "vineland_debug_log.txt")
-    with open(log_path, "a") as f:
+    with open(log_path, "a", encoding='utf-8') as f:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"[{timestamp}] {message}\n")
 
@@ -83,13 +83,13 @@ if __name__ == "__main__":
             create_log(f"Ouverture navigateur : {url}")
             webbrowser.open(url)
 
-        print("="*50)
-        print("🧠 VINELAND-II - ÉVALUATION COMPORTEMENT ADAPTATIF")
-        print("="*50)
-        print(f"📱 Application accessible à : http://{local_ip}:8000/")
-        print("📋 Logs : vineland_debug_log.txt")
-        print("⚠️  Fermez cette fenêtre pour arrêter")
-        print("="*50)
+        print("=" * 50)
+        print("VINELAND-II - EVALUATION COMPORTEMENT ADAPTATIF")
+        print("=" * 50)
+        print(f"Application accessible a : http://{local_ip}:8000/")
+        print("Logs : vineland_debug_log.txt")
+        print("Fermez cette fenetre pour arreter")
+        print("=" * 50)
 
         threading.Thread(target=run_django_server, daemon=True).start()
         open_browser()
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     except Exception as e:
         error_path = os.path.join(get_app_dir(), "vineland_error_log.txt")
-        with open(error_path, "w") as f:
+        with open(error_path, "w", encoding='utf-8') as f:
             f.write(f"Erreur Vineland : {str(e)}\n")
             import traceback
             f.write(traceback.format_exc())

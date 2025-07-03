@@ -79,14 +79,14 @@ args.extend([
     '--hidden-import=vineland.admin',
 ])
 
-print("🚀 Démarrage de la compilation Vineland-II...")
+print("Demarrage de la compilation Vineland-II...")
 
 try:
     PyInstaller.__main__.run(args)
-    print("✅ Compilation terminée avec succès!")
-    print("📁 Exécutable disponible dans le dossier 'dist/'")
+    print("Compilation terminee avec succes!")
+    print("Executable disponible dans le dossier 'dist/'")
 except Exception as e:
-    print(f"❌ Erreur lors de la compilation: {str(e)}")
-    print("\n🔧 Commande PyInstaller équivalente:")
+    print(f"Erreur lors de la compilation: {str(e)}")
+    print("\nCommande PyInstaller equivalente:")
     cmd = "pyinstaller " + " ".join([f'"{arg}"' if ' ' in arg else arg for arg in args])
     print(cmd)
