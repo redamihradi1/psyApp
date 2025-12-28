@@ -789,64 +789,6 @@ def vineland_export_pdf(request, questionnaire_id):
     
     return response
 
-# @login_required
-# def vineland_export_pdf(request, questionnaire_id):
-#     """Génère et retourne un PDF avec le rapport d'évaluation Vineland."""
-#     # Récupérer les données de base
-#     questionnaire = get_object_or_404(Questionnaire, id=questionnaire_id)
-#     student = questionnaire.student
-#     reponses = ReponseVineland.objects.filter(questionnaire=questionnaire).select_related('question')
-    
-#     # Déterminer les attributs des questions
-#     text_attr, num_attr = get_question_attributes(reponses)
-    
-#     # Calculer l'âge
-#     age_info = get_student_age(questionnaire)
-    
-#     # Obtenir les tranches d'âge
-#     tranche_age, tranche_age_intervalle = get_age_tranches(age_info['years'])
-    
-#     # Préparer la réponse HTTP
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="vineland_rapport_{student.name}_{datetime.now().strftime("%Y%m%d")}.pdf"'
-    
-#     # Créer le document PDF
-#     buffer = io.BytesIO()
-#     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
-    
-#     # Obtenir les styles
-#     styles = create_pdf_styles()
-    
-#     # Liste pour stocker tous les éléments du document
-#     elements = []
-    
-#     # Page 1: Couverture
-#     create_cover_page(elements, student, questionnaire, age_info, styles)
-    
-#     # Page 2: Questions et réponses
-#     if reponses.exists():
-#         create_questions_section(elements, reponses, styles, text_attr, num_attr)
-    
-#     # Page 3: Synthèse des scores
-#     scores = calculate_all_scores(questionnaire)
-#     complete_scores = calculate_domain_scores(
-#         scores, age_info, tranche_age, tranche_age_intervalle, questionnaire
-#     )
-#     create_scores_summary(elements, questionnaire, complete_scores, styles)
-    
-#     # Page 4: Comparaisons par paires
-#     create_comparisons_section(elements, questionnaire, scores, age_info, styles)
-    
-#     # Construire le PDF
-#     doc.build(elements)
-#     pdf = buffer.getvalue()
-#     buffer.close()
-#     response.write(pdf)
-    
-#     return response
-
-# ========== FONCTIONS DE COMPARAISON ==========
-
 def create_pdf_styles():
     """Crée et retourne les styles nécessaires pour le PDF."""
     styles = getSampleStyleSheet()
@@ -922,22 +864,6 @@ def create_cover_page(elements, student, questionnaire, age_info, styles, niveau
     elements.append(Paragraph(f"Niveau de significativité: {niveau_significativite}", styles['normal']))
     
     elements.append(PageBreak())
-# def create_cover_page(elements, student, questionnaire, age_info, styles):
-#     """Crée la page de couverture du rapport."""
-#     elements.append(Paragraph("Rapport d'évaluation Vineland-II", styles['title']))
-#     elements.append(Spacer(1, 0.5*cm))
-#     elements.append(Paragraph(f"Enfant: {student.name}", styles['subtitle']))
-#     elements.append(Paragraph(f"Date de naissance: {student.date_of_birth.strftime('%d/%m/%Y')}", styles['normal']))
-#     elements.append(Paragraph(
-#         f"Âge au moment du test: {age_info['years']} ans, {age_info['months']} mois, {age_info['days']} jours",
-#         styles['normal']
-#     ))
-#     elements.append(Paragraph(f"Date d'évaluation: {questionnaire.created_at.strftime('%d/%m/%Y')}", styles['normal']))
-#     elements.append(Paragraph(
-#         f"Évaluateur: {questionnaire.parent.get_full_name() or questionnaire.parent.username}",
-#         styles['normal']
-#     ))
-#     elements.append(PageBreak())
 
 
 def create_questions_section(elements, reponses, styles, text_attr, num_attr):
@@ -1147,42 +1073,6 @@ def create_comparisons_section(elements, questionnaire, scores, age_info, styles
     )
     if interdomaine_comparisons:
         create_interdomain_comparison_table(elements, interdomaine_comparisons, styles)
-# def create_comparisons_section(elements, questionnaire, scores, age_info, styles):
-#     """Crée la section des comparaisons par paires."""
-#     elements.append(Paragraph("Comparaisons par paires", styles['title']))
-#     elements.append(Spacer(1, 0.5*cm))
-    
-#     tranche_age, _ = get_age_tranches(age_info['years'])
-#     tranche_age_simple = get_simple_age_range(age_info['years'])
-    
-#     # Collecter les scores
-#     domaine_scores, sous_domaine_scores = collect_scores_for_comparisons(
-#         scores, questionnaire, age_info
-#     )
-    
-#     # Générer et afficher les comparaisons de domaines
-#     domain_comparisons = generate_domain_comparisons_for_pdf(
-#         domaine_scores, tranche_age_simple, tranche_age
-#     )
-#     if domain_comparisons:
-#         create_domain_comparison_table(elements, domain_comparisons, styles)
-#         elements.append(Spacer(1, 1*cm))
-    
-#     # Générer et afficher les comparaisons de sous-domaines
-#     sous_domaine_comparisons = generate_subdomain_comparisons_for_pdf(
-#         sous_domaine_scores, tranche_age
-#     )
-#     for domaine, comparisons in sous_domaine_comparisons.items():
-#         if comparisons:
-#             create_subdomain_comparison_table(elements, domaine, comparisons, styles)
-#             elements.append(Spacer(1, 1*cm))
-    
-#     # Générer et afficher les comparaisons inter-domaines
-#     interdomaine_comparisons = generate_interdomain_comparisons_for_pdf(
-#         sous_domaine_scores, tranche_age
-#     )
-#     if interdomaine_comparisons:
-#         create_interdomain_comparison_table(elements, interdomaine_comparisons, styles)
 
 
 def get_simple_age_range(age_years):
@@ -1282,45 +1172,7 @@ def generate_domain_comparisons_for_pdf(domaine_scores, tranche_age_simple, tran
             })
     
     return comparisons
-# def generate_domain_comparisons_for_pdf(domaine_scores, tranche_age_simple, tranche_age):
-#     """Génère les comparaisons de domaines pour le PDF."""
-#     comparisons = []
-#     domaines = list(domaine_scores.keys())
-#     niveau_significativite = ".05"  # Valeur par défaut
-    
-#     for i in range(len(domaines)):
-#         for j in range(i+1, len(domaines)):
-#             domaine1 = domaines[i]
-#             domaine2 = domaines[j]
-#             score1 = domaine_scores[domaine1]['note_standard']
-#             score2 = domaine_scores[domaine2]['note_standard']
-            
-#             domain1_obj = domaine_scores[domaine1]['domaine_obj']
-#             domain2_obj = domaine_scores[domaine2]['domaine_obj']
-            
-#             difference = abs(score1 - score2)
-#             signe = '>' if score1 > score2 else '<' if score1 < score2 else '='
-            
-#             comparison = find_domain_comparison(
-#                 domain1_obj, domain2_obj, tranche_age_simple, niveau_significativite
-#             )
-#             freq = find_domain_frequency(domain1_obj, domain2_obj, tranche_age)
-            
-#             est_significatif = comparison and difference >= comparison.difference_requise
-#             frequence = get_frequency_percentage(difference, freq)
-            
-#             comparisons.append({
-#                 'domaine1': domaine1,
-#                 'domaine2': domaine2,
-#                 'note1': score1,
-#                 'note2': score2,
-#                 'signe': signe,
-#                 'difference': difference,
-#                 'est_significatif': est_significatif,
-#                 'frequence': frequence
-#             })
-    
-#     return comparisons
+
 
 def generate_subdomain_comparisons_for_pdf(sous_domaine_scores, tranche_age, niveau_significativite='.05'):
     """Génère les comparaisons de sous-domaines pour le PDF."""
@@ -1373,57 +1225,6 @@ def generate_subdomain_comparisons_for_pdf(sous_domaine_scores, tranche_age, niv
     
     return comparisons
 
-# def generate_subdomain_comparisons_for_pdf(sous_domaine_scores, tranche_age):
-#     """Génère les comparaisons de sous-domaines pour le PDF."""
-#     # Grouper par domaine
-#     grouped = {}
-#     for sous_domaine, data in sous_domaine_scores.items():
-#         domaine = data['domaine']
-#         if domaine not in grouped:
-#             grouped[domaine] = []
-#         grouped[domaine].append(sous_domaine)
-    
-#     comparisons = {}
-#     niveau_significativite = ".05"
-    
-#     for domaine, sous_domaines in grouped.items():
-#         comparisons[domaine] = []
-        
-#         for i in range(len(sous_domaines)):
-#             for j in range(i+1, len(sous_domaines)):
-#                 sous_domaine1 = sous_domaines[i]
-#                 sous_domaine2 = sous_domaines[j]
-#                 note1 = sous_domaine_scores[sous_domaine1]['note_echelle_v']
-#                 note2 = sous_domaine_scores[sous_domaine2]['note_echelle_v']
-                
-#                 sous_domaine1_obj = sous_domaine_scores[sous_domaine1]['sous_domaine_obj']
-#                 sous_domaine2_obj = sous_domaine_scores[sous_domaine2]['sous_domaine_obj']
-                
-#                 difference = abs(note1 - note2)
-#                 signe = '>' if note1 > note2 else '<' if note1 < note2 else '='
-                
-#                 comparison = find_sous_domaine_comparison(
-#                     sous_domaine1_obj, sous_domaine2_obj, tranche_age, niveau_significativite
-#                 )
-#                 freq = find_sous_domaine_frequency(
-#                     sous_domaine1_obj, sous_domaine2_obj, tranche_age
-#                 )
-                
-#                 est_significatif = comparison and difference >= comparison.difference_requise
-#                 frequence = get_frequency_percentage(difference, freq)
-                
-#                 comparisons[domaine].append({
-#                     'sous_domaine1': sous_domaine1,
-#                     'sous_domaine2': sous_domaine2,
-#                     'note1': note1,
-#                     'note2': note2,
-#                     'signe': signe,
-#                     'difference': difference,
-#                     'est_significatif': est_significatif,
-#                     'frequence': frequence
-#                 })
-    
-#     return comparisons
 
 def generate_interdomain_comparisons_for_pdf(sous_domaine_scores, tranche_age, niveau_significativite='.05'):
     """Génère les comparaisons inter-domaines pour le PDF."""
@@ -1472,54 +1273,6 @@ def generate_interdomain_comparisons_for_pdf(sous_domaine_scores, tranche_age, n
                 })
     
     return comparisons
-# def generate_interdomain_comparisons_for_pdf(sous_domaine_scores, tranche_age):
-#     """Génère les comparaisons inter-domaines pour le PDF."""
-#     comparisons = []
-#     all_sous_domaines = list(sous_domaine_scores.keys())
-#     niveau_significativite = ".05"
-    
-#     for i in range(len(all_sous_domaines)):
-#         for j in range(i+1, len(all_sous_domaines)):
-#             sous_domaine1 = all_sous_domaines[i]
-#             sous_domaine2 = all_sous_domaines[j]
-            
-#             domaine1 = sous_domaine_scores[sous_domaine1]['domaine']
-#             domaine2 = sous_domaine_scores[sous_domaine2]['domaine']
-            
-#             if domaine1 != domaine2:
-#                 note1 = sous_domaine_scores[sous_domaine1]['note_echelle_v']
-#                 note2 = sous_domaine_scores[sous_domaine2]['note_echelle_v']
-                
-#                 sous_domaine1_obj = sous_domaine_scores[sous_domaine1]['sous_domaine_obj']
-#                 sous_domaine2_obj = sous_domaine_scores[sous_domaine2]['sous_domaine_obj']
-                
-#                 difference = abs(note1 - note2)
-#                 signe = '>' if note1 > note2 else '<' if note1 < note2 else '='
-                
-#                 comparison = find_sous_domaine_comparison(
-#                     sous_domaine1_obj, sous_domaine2_obj, tranche_age, niveau_significativite
-#                 )
-#                 freq = find_sous_domaine_frequency(
-#                     sous_domaine1_obj, sous_domaine2_obj, tranche_age
-#                 )
-                
-#                 est_significatif = comparison and difference >= comparison.difference_requise
-#                 frequence = get_frequency_percentage(difference, freq)
-                
-#                 comparisons.append({
-#                     'sous_domaine1': sous_domaine1,
-#                     'sous_domaine2': sous_domaine2,
-#                     'domaine1': domaine1,
-#                     'domaine2': domaine2,
-#                     'note1': note1,
-#                     'note2': note2,
-#                     'signe': signe,
-#                     'difference': difference,
-#                     'est_significatif': est_significatif,
-#                     'frequence': frequence
-#                 })
-    
-#     return comparisons
 
 
 def create_domain_comparison_table(elements, comparisons, styles):
