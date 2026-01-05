@@ -5,7 +5,7 @@
   <h2 class="text-2xl font-bold mb-6">Formulaires disponibles</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for formulaire in formulaires %}
-    {% if formulaire.title == 'PEP3' %}
+    {% comment %} {% if formulaire.title == 'PEP3' %}
     <div class="bg-white rounded-lg shadow p-6">
       <h3 class="text-lg font-semibold mb-2">{{ formulaire.title }}</h3>
       <p class="text-gray-600 mb-4">Test psycho-éducatif pour l'évaluation du développement</p>
@@ -13,8 +13,8 @@
          class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         Commencer
       </a>
-    </div>
-    {% elif formulaire.title == 'Vineland' %}
+    </div> {% endcomment %}
+    {% if formulaire.title == 'Vineland' %}
     <div class="bg-white rounded-lg shadow p-6">
       <h3 class="text-lg font-semibold mb-2">{{ formulaire.title }}</h3>
       <p class="text-gray-600 mb-4">Échelle d'évaluation du comportement adaptatif</p>
@@ -28,7 +28,7 @@
   </div>
 
   <!-- Section PEP3 -->
-  <div class="mt-12">
+  {% comment %} <div class="mt-12">
     <h2 class="text-2xl font-bold mb-6">Tests PEP3 récents</h2>
     <div class="bg-white shadow rounded-lg overflow-hidden">
       <table class="min-w-full">
@@ -140,7 +140,7 @@
       </div>
       {% endif %}
     </div>
-  </div>
+  </div> {% endcomment %}
 
   <!-- Section Vineland -->
   <div class="mt-12">

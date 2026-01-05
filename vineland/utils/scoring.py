@@ -20,10 +20,66 @@ def calculate_item_plancher(reponses, sous_domaine):
             consecutive_count = 0
     return 0
 
+# def calculate_domain_scores(questionnaire, domain):
+#     """Calcule tous les scores pour un domaine"""
+#     scores = {}
+
+    
+#     for sous_domaine in domain.sous_domaines.all():
+#         reponses = ReponseVineland.objects.filter(
+#             questionnaire=questionnaire,
+#             question__sous_domaine=sous_domaine
+#         ).order_by('question__numero_item')
+        
+#         # Item plancher
+#         item_plancher = calculate_item_plancher(reponses, sous_domaine)
+#         calcul_precedent = item_plancher  * 2
+
+#         # Nombre de NSP et sans réponses
+#         nsp_count = reponses.filter(
+#             Q(reponse='NSP') | Q(reponse='') | Q(reponse__isnull=True)
+#         ).count()
+        
+#         # Nombre de N/A
+#         na_count = reponses.filter(reponse='NA').count()
+        
+#         # Somme des réponses 1 et 2
+#         sum_1_2 = reponses.filter(
+#                             question__numero_item__gt=item_plancher
+#                                 ).aggregate(
+#                                     total=Sum(
+#                                         Case(
+#                                             When(reponse='1', then=1),
+#                                             When(reponse='2', then=2),
+#                                             default=0,
+#                                             output_field=IntegerField(),
+#                                         )
+#                                     )
+#                                 )['total'] or 0
+        
+#         # Note brute
+#         note_brute = (item_plancher ) * 2 + sum_1_2 + nsp_count
+        
+
+#         # Vérifier si le sous-domaine doit être refait
+#         a_refaire = nsp_count > 2
+
+#         scores[sous_domaine.name] = {
+#             'item_titre': "Entre item plancher et item plafond",
+#             'item_calcul': f"Item précédent de l'item plancher ({item_plancher }) × 2 = {calcul_precedent}",
+#             'item_plancher': item_plancher,
+#             'nsp_count': nsp_count,
+#             'na_count': na_count,
+#             'sum_1_2': sum_1_2,
+#             'note_brute': note_brute,
+#             'a_refaire': a_refaire  
+#         }
+    
+#     return scores
+
 def calculate_domain_scores(questionnaire, domain):
     """Calcule tous les scores pour un domaine"""
     scores = {}
-
     
     for sous_domaine in domain.sous_domaines.all():
         reponses = ReponseVineland.objects.filter(
@@ -33,8 +89,10 @@ def calculate_domain_scores(questionnaire, domain):
         
         # Item plancher
         item_plancher = calculate_item_plancher(reponses, sous_domaine)
-        calcul_precedent = item_plancher  * 2
-
+        
+        # ⭐ NOUVEAU : Item plafond
+        item_plafond = calculate_item_plafond(reponses, sous_domaine)
+        
         # Nombre de NSP et sans réponses
         nsp_count = reponses.filter(
             Q(reponse='NSP') | Q(reponse='') | Q(reponse__isnull=True)
@@ -43,36 +101,39 @@ def calculate_domain_scores(questionnaire, domain):
         # Nombre de N/A
         na_count = reponses.filter(reponse='NA').count()
         
-        # Somme des réponses 1 et 2
-        sum_1_2 = reponses.filter(
-                            question__numero_item__gt=item_plancher
-                                ).aggregate(
-                                    total=Sum(
-                                        Case(
-                                            When(reponse='1', then=1),
-                                            When(reponse='2', then=2),
-                                            default=0,
-                                            output_field=IntegerField(),
-                                        )
-                                    )
-                                )['total'] or 0
+        # ⭐ MODIFIÉ : Somme des 1 et 2 ENTRE plancher et plafond UNIQUEMENT
+        query_filter = Q(question__numero_item__gt=item_plancher)
         
-        # Note brute
-        note_brute = (item_plancher ) * 2 + sum_1_2 + nsp_count
+        if item_plafond is not None:
+            # Si plafond existe, on exclut les items >= plafond
+            query_filter &= Q(question__numero_item__lt=item_plafond)
         
-
+        sum_1_2 = reponses.filter(query_filter).aggregate(
+            total=Sum(
+                Case(
+                    When(reponse='1', then=1),
+                    When(reponse='2', then=2),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            )
+        )['total'] or 0
+        
+        # Note brute = (items avant plancher × 2) + (somme entre plancher et plafond)
+        note_brute = (item_plancher * 2) + sum_1_2 + nsp_count
+        
         # Vérifier si le sous-domaine doit être refait
         a_refaire = nsp_count > 2
-
+        
         scores[sous_domaine.name] = {
             'item_titre': "Entre item plancher et item plafond",
-            'item_calcul': f"Item précédent de l'item plancher ({item_plancher }) × 2 = {calcul_precedent}",
             'item_plancher': item_plancher,
+            'item_plafond': item_plafond,  # ⭐ AJOUTÉ
             'nsp_count': nsp_count,
             'na_count': na_count,
             'sum_1_2': sum_1_2,
             'note_brute': note_brute,
-            'a_refaire': a_refaire  
+            'a_refaire': a_refaire
         }
     
     return scores
@@ -93,3 +154,28 @@ def calculate_all_scores(questionnaire):
             pass
             
     return all_scores
+
+def calculate_item_plafond(reponses, sous_domaine):
+    """
+    Calcule l'item plafond = PREMIER item coté 0 
+    dans un groupe de 4 zéros consécutifs EN PARTANT DU BAS
+    """
+    # Trier par numéro d'item DÉCROISSANT (du plus haut au plus bas)
+    items = list(reponses.filter(
+        question__sous_domaine=sous_domaine
+    ).order_by('-question__numero_item'))  # ⚠️ ORDRE INVERSE
+    
+    consecutive_zeros = 0
+    premier_item_groupe = None
+    
+    for reponse in items:
+        if reponse.reponse == '0':
+            consecutive_zeros += 1
+            premier_item_groupe = reponse.question.numero_item  # On garde le premier
+            if consecutive_zeros == 4:
+                return premier_item_groupe  # Retourne le PREMIER du groupe
+        else:
+            consecutive_zeros = 0
+            premier_item_groupe = None
+    
+    return None  # Pas de plafond trouvé

@@ -14,19 +14,39 @@
       <div class="border rounded p-4">
         <h3 class="font-medium mb-3">{{ sous_domain }}</h3>
 
-        <div class="mb-4">
+        <div class="mb-4 bg-blue-50 p-3 rounded">
+          <!-- Item Plancher -->
           <div class="flex justify-between mb-1">
-            <span
-              >Item précédent de l'item plancher ({{ score.item_plancher }}) × 2
-              =</span
+            <span class="text-sm">🔽 Item plancher :</span>
+            <span class="font-semibold">{{ score.item_plancher }}</span>
+          </div>
+          
+          <!-- Item Plafond -->
+          <div class="flex justify-between mb-2">
+            <span class="text-sm">🔼 Item plafond :</span>
+            <span class="font-semibold">
+              {% if score.item_plafond %}
+                {{ score.item_plafond }}
+              {% else %}
+                <span class="text-gray-500 italic">Aucun</span>
+              {% endif %}
+            </span>
+          </div>
+          
+          <!-- Calcul items avant plancher -->
+          <div class="flex justify-between border-t pt-2">
+            <span class="text-xs text-gray-600"
+              >Items avant plancher ({{ score.item_plancher }}) × 2 =</span
             >
-            <span class="font-semibold"
+            <span class="font-semibold text-sm"
               >{{ score.item_plancher|multiply:2 }}</span
             >
           </div>
-          <h4 class="text-sm font-small text-gray-600">
+          
+          <!-- Titre dynamique -->
+          <div class="mt-2 text-xs text-center text-gray-600 italic">
             {{ score.item_titre }}
-          </h4>
+          </div>
         </div>
 
         <div class="space-y-2">
